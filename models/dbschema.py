@@ -10,9 +10,15 @@ class User(Document):
     dob: str
     phone_number: str
     address: str
-    wishlist: list[BackLink["Wishlist"]] = Field(original_field="user_wished")
-    orders: list[BackLink["Orders"]] = Field(original_field="user_ordered")
-    reviews: list[BackLink["Reviews"]] = Field(original_field="user_reviewd")
+    wishlist: list[BackLink["Wishlist"]] = Field(
+        original_field="user_wished", default_factory=list
+    )
+    orders: list[BackLink["Orders"]] = Field(
+        original_field="user_ordered", default_factory=list
+    )
+    reviews: list[BackLink["Reviews"]] = Field(
+        original_field="user_reviewd", default_factory=list
+    )
 
 
 class Admin(Document):
@@ -29,13 +35,17 @@ class Seller(Document):
     company_address: str
     country: str
     seller_name: str
-    products_selling: list[BackLink["Product"]] = Field(original_field="seller")
+    products_selling: list[BackLink["Product"]] = Field(
+        original_field="seller", default_factory=list
+    )
 
 
 class Category(Document):
     name: str
     categoryImage: list[str]
-    products_belonging: list[BackLink["Product"]] = Field(original_field="category")
+    products_belonging: list[BackLink["Product"]] = Field(
+        original_field="category", default_factory=list
+    )
 
 
 class Product(Document):
@@ -54,9 +64,15 @@ class Product(Document):
     seller: Link[Seller]
     stock: int
     title: str
-    wishedBy: list[BackLink["Wishlist"]] = Field(original_field="product_wished")
-    orderedBy: list[BackLink["Orders"]] = Field(original_field="product_ordered")
-    reviewedBy: list[BackLink["Reviews"]] = Field(original_field="product_reviewed")
+    wishedBy: list[BackLink["Wishlist"]] = Field(
+        original_field="product_wished", default_factory=list
+    )
+    orderedBy: list[BackLink["Orders"]] = Field(
+        original_field="product_ordered", default_factory=list
+    )
+    reviewedBy: list[BackLink["Reviews"]] = Field(
+        original_field="product_reviewed", default_factory=list
+    )
 
 
 class Wishlist(Document):
