@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI):
     yield
 
     # Close beanie connection
-    await beanie_connection.connect()
+    await beanie_connection.disconnect()
 
 
 # FastAPI app
