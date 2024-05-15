@@ -11,13 +11,13 @@ class User(Document):
     phone_number: str
     address: str
     wishlist: list[BackLink["Wishlist"]] = Field(
-        original_field="user_wished", default_factory=list
+        json_schema_extra={"original_field": "user_wished"}, default_factory=list
     )
     orders: list[BackLink["Orders"]] = Field(
-        original_field="user_ordered", default_factory=list
+        json_schema_extra={"original_field": "user_ordered"}, default_factory=list
     )
     reviews: list[BackLink["Reviews"]] = Field(
-        original_field="user_reviewd", default_factory=list
+        json_schema_extra={"original_field": "user_reviewed"}, default_factory=list
     )
 
 
@@ -36,7 +36,7 @@ class Seller(Document):
     country: str
     seller_name: str
     products_selling: list[BackLink["Product"]] = Field(
-        original_field="seller", default_factory=list
+        json_schema_extra={"original_field": "seller"}, default_factory=list
     )
 
 
@@ -44,7 +44,7 @@ class Category(Document):
     name: str
     categoryImage: list[str]
     products_belonging: list[BackLink["Product"]] = Field(
-        original_field="category", default_factory=list
+        json_schema_extra={"original_field": "category"}, default_factory=list
     )
 
 
@@ -65,13 +65,13 @@ class Product(Document):
     stock: int
     title: str
     wishedBy: list[BackLink["Wishlist"]] = Field(
-        original_field="product_wished", default_factory=list
+        json_schema_extra={"original_field": "product_wished"}, default_factory=list
     )
     orderedBy: list[BackLink["Orders"]] = Field(
-        original_field="product_ordered", default_factory=list
+        json_schema_extra={"original_field": "product_ordered"}, default_factory=list
     )
     reviewedBy: list[BackLink["Reviews"]] = Field(
-        original_field="product_reviewed", default_factory=list
+        json_schema_extra={"original_field": "product_reviewed"}, default_factory=list
     )
 
 
@@ -88,6 +88,6 @@ class Orders(Document):
 
 
 class Reviews(Document):
-    user_reviewd: Link["User"]
+    user_reviewed: Link["User"]
     product_reviewed: Link["Product"]
     orderedAt: datetime = Field(default=datetime.now())
