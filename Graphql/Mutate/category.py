@@ -7,7 +7,7 @@ from models.dbschema import Category
 class Mutation:
     @strawberry.mutation
     async def insert_categories_from_dataset() -> str:
-        with open("./dataset.json") as fp:
+        with open("./dataset/dataset.json") as fp:
             data = json.load(fp)
 
         hmap = {}

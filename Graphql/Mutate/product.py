@@ -7,7 +7,7 @@ from models.dbschema import Product, Category, Seller
 class Mutation:
     @strawberry.mutation
     async def insert_products_from_dataset() -> str:
-        with open("./dataset.json") as fp:
+        with open("./dataset/dataset.json") as fp:
             data = json.load(fp)
 
         for prod in data:

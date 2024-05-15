@@ -1,6 +1,13 @@
 from beanie import Document, Link, BackLink, Indexed
 from datetime import datetime
-from pydantic import Field
+from pydantic import BaseModel, Field
+
+
+class Address(BaseModel):
+    street_address: str
+    city: str
+    state: str
+    zip_code: str
 
 
 class User(Document):
@@ -9,7 +16,7 @@ class User(Document):
     password: str
     dob: str
     phone_number: str
-    address: str
+    address: Address
     wishlist: list[BackLink["Wishlist"]] = Field(
         json_schema_extra={"original_field": "user_wished"}, default_factory=list
     )
@@ -32,7 +39,7 @@ class Seller(Document):
     dob: str
     password: str
     company_name: str
-    company_address: str
+    company_address: Address
     country: str
     seller_name: str
     products_selling: list[BackLink["Product"]] = Field(
