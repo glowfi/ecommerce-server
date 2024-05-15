@@ -29,7 +29,7 @@ class Seller:
         self.seller_name = f"{fake.first_name()} {fake.last_name()}"
 
 
-with open("./dataset/dataset.json", "r") as fp:
+with open("./dataset.json", "r") as fp:
     data = json.load(fp)
 
 for prod in data:
