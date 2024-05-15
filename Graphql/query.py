@@ -1,16 +1,9 @@
-from typing import List
 import strawberry
-from Graphql.schema.seller import Seller
-import json
-from models.dbschema import Seller as sl
+from Graphql.Query.seller import Query as sellerQuery
 
 
 @strawberry.type
-class Query:
+class Query(sellerQuery):
     @strawberry.field
     async def hello() -> str:
         return "hello"
-
-    @strawberry.field()
-    async def sellerTest() -> List[Seller] | None:
-        return await sl.find_all(fetch_links=True).to_list()
