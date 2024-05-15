@@ -2,6 +2,17 @@ import os
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 from dotenv import find_dotenv, load_dotenv
+from models.dbschema import (
+    User,
+    Admin,
+    Seller,
+    Category,
+    Product,
+    Orders,
+    Reviews,
+    Wishlist,
+)
+
 
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
@@ -19,7 +30,16 @@ class BeanieConnection:
 
         await init_beanie(
             database=db,
-            document_models=[],
+            document_models=[
+                User,
+                Admin,
+                Seller,
+                Category,
+                Product,
+                Orders,
+                Reviews,
+                Wishlist,
+            ],
         )
 
     async def disconnect(self):
