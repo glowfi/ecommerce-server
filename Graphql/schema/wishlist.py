@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 @strawberry.type
 class Wishlist:
+    id: str
     user_wished: Annotated["User", strawberry.lazy(".user")]
     product_wished: Annotated["Product", strawberry.lazy(".product")]
     wishedAt: datetime

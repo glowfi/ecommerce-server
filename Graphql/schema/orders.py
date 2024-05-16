@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 @strawberry.type
 class Orders:
+    id: str
     user_ordered: Annotated["User", strawberry.lazy(".user")]
     product_ordered: Annotated["Product", strawberry.lazy(".product")]
     orderedAt: datetime

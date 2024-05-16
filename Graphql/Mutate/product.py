@@ -1,6 +1,13 @@
 import strawberry
 import json
 from models.dbschema import Product, Category, Seller
+from Graphql.schema.product import (
+    Product as pr,
+    InputProduct as ipr,
+    ResponseProduct as rpr,
+    InputUpdateProduct as iupr,
+)
+from helper.utils import encode_input
 
 
 @strawberry.type
@@ -40,3 +47,95 @@ class Mutation:
                     )
                     await new_prod.insert()
         return "Done!"
+
+    @strawberry.mutation
+    async def insert_product(self, data: ipr) -> rpr:
+        try:
+            encode_data = encode_input(data.__dict__)
+            # Find Seller
+            seller = await Seller.get(encode_data["sellerID"], fetch_links=True)
+            # Find Category
+            if seller:
+                cat = await Category.get(encode_data["categoryID"], fetch_links=True)
+                if cat:
+                    encode_data["category"] = cat
+                    encode_data["seller"] = seller
+
+                    new_prod = Product(**encode_data)
+                    prod_ins = await new_prod.insert()
+
+                    return rpr(data=prod_ins, err=None)
+                else:
+                    return rpr(
+                        data=None,
+                        err=f"No category found with categoryID {encode_data["categoryID"]}",
+                    )
+            else:
+                return rpr(
+                    data=None,
+                    err=f"No such seller with sellerID {encode_data["sellerID"]}",
+                )
+        except Exception as e:
+            return rpr(data=None, err=str(e))
+
+    @strawberry.mutation
+    async def update_product(self, data: iupr) -> rpr:
+        try:
+            encode_data = encode_input(data.__dict__)
+            # Find Seller
+            seller = await Seller.get(encode_data["sellerID"], fetch_links=True)
+            # Find Category
+            if seller:
+                cat = await Category.get(encode_data["categoryID"], fetch_links=True)
+                if cat:
+                    # Find Product
+                    prod = await Product.get(encode_data["productID"], fetch_links=True)
+                    if prod:
+                        prod_updated = await prod.update({"$set": encode_data})
+                        return rpr(data=prod_updated, err=None)
+                    else:
+                        return rpr(
+                            data=None,
+                            err=f"No product found with productID {encode_data["productID"]}",
+                        )
+
+                else:
+                    return rpr(
+                        data=None,
+                        err=f"No category found with categoryID {encode_data["categoryID"]}",
+                    )
+            else:
+                return rpr(
+                    data=None,
+                    err=f"No such seller with sellerID {encode_data["sellerID"]}",
+                )
+
+        except Exception as e:
+            raise e
+
+    @strawberry.mutation
+    async def delete_product(self, productID: str) -> rpr:
+        try:
+            prod = await Product.get(productID)
+            if prod:
+                await prod.delete()
+                return rpr(data=prod, err=None)
+            else:
+                return rpr(
+                    data=None, err=f"No product found with productID {productID}"
+                )
+        except Exception as e:
+            return rpr(data=None, err=str(e))
+
+    @strawberry.mutation
+    async def get_product_by_id(self, productID: str) -> rpr:
+        try:
+            prod = await Product.get(productID)
+            if prod:
+                return rpr(data=prod, err=None)
+            else:
+                return rpr(
+                    data=None, err=f"No product found with productID {productID}"
+                )
+        except Exception as e:
+            return rpr(data=None, err=str(e))

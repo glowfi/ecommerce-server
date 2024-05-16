@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 
 @strawberry.type
 class User:
+    id: str
     email: str
     name: str
     password: str

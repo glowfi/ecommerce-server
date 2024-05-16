@@ -7,6 +7,7 @@ if TYPE_CHECKING:
 
 @strawberry.type
 class Seller:
+    id: str
     email: str
     phone_number: str
     dob: str

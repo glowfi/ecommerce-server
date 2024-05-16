@@ -7,6 +7,7 @@ if TYPE_CHECKING:
 
 @strawberry.type
 class Category:
+    id: str
     name: str
     categoryImage: list[str]
     products_belonging: list[Annotated["Product", strawberry.lazy(".product")]]

@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 @strawberry.type
 class Reviews:
+    id: str
     user_reviewed: Annotated["User", strawberry.lazy(".user")]
     product_reviewed: Annotated["Product", strawberry.lazy(".product")]
     reviewedAt: datetime
