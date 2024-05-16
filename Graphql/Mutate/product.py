@@ -116,10 +116,10 @@ class Mutation:
     @strawberry.mutation
     async def delete_product(self, productID: str) -> rpr:
         try:
-            prod = await Product.get(productID)
+            prod = await Product.get(productID, fetch_links=True)
             if prod:
-                await prod.delete()
-                return rpr(data=prod, err=None)
+                prod_delete = await prod.delete()
+                return rpr(data=prod_delete, err=None)
             else:
                 return rpr(
                     data=None, err=f"No product found with productID {productID}"
@@ -130,7 +130,7 @@ class Mutation:
     @strawberry.mutation
     async def get_product_by_id(self, productID: str) -> rpr:
         try:
-            prod = await Product.get(productID)
+            prod = await Product.get(productID, fetch_links=True)
             if prod:
                 return rpr(data=prod, err=None)
             else:

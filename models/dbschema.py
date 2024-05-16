@@ -95,6 +95,7 @@ class Orders(Document):
 
 
 class Reviews(Document):
+    comment: str
     user_reviewed: Link["User"]
     product_reviewed: Link["Product"]
     orderedAt: datetime = Field(default=datetime.now())
