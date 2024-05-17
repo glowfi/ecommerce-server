@@ -25,7 +25,6 @@ class InputReviews:
 
 @strawberry.input
 class InputUpdateReviews:
-    reviewID: str
     comment: str
 
 

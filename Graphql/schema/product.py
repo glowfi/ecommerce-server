@@ -54,7 +54,6 @@ class InputProduct:
 @strawberry.input
 class InputUpdateProduct:
     brand: Optional[str] = strawberry.field(default_factory=str)
-    categoryID: str
     coverImage: Optional[list[str]] = strawberry.field(default_factory=list)
     date_created: Optional[int] = strawberry.field(default_factory=int)
     date_created_human: Optional[str] = strawberry.field(default_factory=str)
@@ -65,10 +64,8 @@ class InputUpdateProduct:
     price: Optional[float] = strawberry.field(default_factory=float)
     price_inr: Optional[float] = strawberry.field(default_factory=float)
     rating: Optional[int] = strawberry.field(default_factory=int)
-    sellerID: str
     stock: Optional[int] = strawberry.field(default_factory=int)
     title: Optional[str] = strawberry.field(default_factory=str)
-    productID: str
 
 
 @strawberry.type

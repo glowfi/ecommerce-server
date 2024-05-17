@@ -1,10 +1,14 @@
 import strawberry
-from Graphql.schema.seller import Seller
-from models.dbschema import Seller as sl
+from Graphql.schema.seller import ResponseGetallSeller as rgse
+from models.dbschema import Seller
 
 
 @strawberry.type
 class Query:
-    @strawberry.field()
-    async def sellerTest() -> list[Seller] | None:
-        return await sl.find_all(fetch_links=True).to_list()
+    @strawberry.field
+    async def get_all_seller() -> rgse:
+        try:
+            allSellers = await Seller.find_many(fetch_links=True, limit=10).to_list()
+            return rgse(data=allSellers, err=None)
+        except Exception as e:
+            return rgse(data=None, err=str(e))

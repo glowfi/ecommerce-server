@@ -44,17 +44,15 @@ class Mutation:
             return rre(data=None, err=str(e))
 
     @strawberry.mutation
-    async def update_review(self, data: ipure) -> rre:
+    async def update_review(self, data: ipure, reviewID: str) -> rre:
         try:
             encoded_data = encode_input(data.__dict__)
-            get_rev = await Reviews.get(encoded_data["reviewID"])
+            get_rev = await Reviews.get(reviewID)
             if get_rev:
                 rev_updated = await get_rev.update({"$set": encoded_data})
                 return rre(data=rev_updated, err=None)
             else:
-                return rre(
-                    data=None, err=f"No review with reviewID {encoded_data['reviewID']}"
-                )
+                return rre(data=None, err=f"No review with reviewID {reviewID}")
         except Exception as e:
             return rre(data=None, err=str(e))
 

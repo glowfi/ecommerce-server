@@ -79,39 +79,21 @@ class Mutation:
             return rpr(data=None, err=str(e))
 
     @strawberry.mutation
-    async def update_product(self, data: iupr) -> rpr:
+    async def update_product(self, data: iupr, productID: str) -> rpr:
         try:
             encode_data = encode_input(data.__dict__)
-            # Find Seller
-            seller = await Seller.get(encode_data["sellerID"], fetch_links=True)
-            # Find Category
-            if seller:
-                cat = await Category.get(encode_data["categoryID"], fetch_links=True)
-                if cat:
-                    # Find Product
-                    prod = await Product.get(encode_data["productID"], fetch_links=True)
-                    if prod:
-                        prod_updated = await prod.update({"$set": encode_data})
-                        return rpr(data=prod_updated, err=None)
-                    else:
-                        return rpr(
-                            data=None,
-                            err=f"No product found with productID {encode_data["productID"]}",
-                        )
-
-                else:
-                    return rpr(
-                        data=None,
-                        err=f"No category found with categoryID {encode_data["categoryID"]}",
-                    )
+            # Find Product
+            prod = await Product.get(productID, fetch_links=True)
+            if prod:
+                prod_updated = await prod.update({"$set": encode_data})
+                return rpr(data=prod_updated, err=None)
             else:
                 return rpr(
                     data=None,
-                    err=f"No such seller with sellerID {encode_data["sellerID"]}",
+                    err=f"No product found with productID {productID}",
                 )
-
         except Exception as e:
-            raise e
+            return rpr(data=None, err=str(e))
 
     @strawberry.mutation
     async def delete_product(self, productID: str) -> rpr:

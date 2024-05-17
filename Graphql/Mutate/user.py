@@ -34,17 +34,15 @@ class Mutation:
             return ru(data=None, err=str(e))
 
     @strawberry.mutation
-    async def update_user(self, data: ipu) -> ru:
+    async def update_user(self, data: ipu, userID: str) -> ru:
         try:
             encoded_data = encode_input(data.__dict__)
-            get_user = await User.get(encoded_data["userID"])
+            get_user = await User.get(userID)
             if get_user:
                 user_updated = await get_user.update({"$set": encoded_data})
                 return ru(data=user_updated, err=None)
             else:
-                return ru(
-                    data=None, err=f"No user with userID {encoded_data['userID']}"
-                )
+                return ru(data=None, err=f"No user with userID {userID}")
         except Exception as e:
             return ru(data=None, err=str(e))
 

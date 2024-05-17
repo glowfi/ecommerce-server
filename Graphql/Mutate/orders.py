@@ -3,7 +3,7 @@ from models.dbschema import Orders, User, Product
 from Graphql.schema.orders import (
     ResponseOrders as ror,
     InputOrders as ipor,
-    InputUpdateOrders as ipuor,
+    # InputUpdateOrders as ipuor,
 )
 from helper.utils import encode_input
 
@@ -42,20 +42,18 @@ class Mutation:
         except Exception as e:
             return ror(data=None, err=str(e))
 
-    @strawberry.mutation
-    async def update_order(self, data: ipuor) -> ror:
-        try:
-            encoded_data = encode_input(data.__dict__)
-            get_ord = await Orders.get(encoded_data["orderID"])
-            if get_ord:
-                ord_updated = await get_ord.update({"$set": encoded_data})
-                return ror(data=ord_updated, err=None)
-            else:
-                return ror(
-                    data=None, err=f"No order with orderID {encoded_data['orderID']}"
-                )
-        except Exception as e:
-            return ror(data=None, err=str(e))
+    # @strawberry.mutation
+    # async def update_order(self, data: ipuor, orderID: str) -> ror:
+    #     try:
+    #         encoded_data = encode_input(data.__dict__)
+    #         get_ord = await Orders.get(orderID)
+    #         if get_ord:
+    #             ord_updated = await get_ord.update({"$set": encoded_data})
+    #             return ror(data=ord_updated, err=None)
+    #         else:
+    #             return ror(data=None, err=f"No order with orderID {orderID}")
+    #     except Exception as e:
+    #         return ror(data=None, err=str(e))
 
     @strawberry.mutation
     async def delete_order(self, orderID: str) -> ror:

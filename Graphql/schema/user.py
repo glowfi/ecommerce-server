@@ -34,7 +34,6 @@ class InputUser:
 
 @strawberry.input
 class InputUpdateUser:
-    userID: str
     email: Optional[str]
     name: Optional[str]
     password: Optional[str]

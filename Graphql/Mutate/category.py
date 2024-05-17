@@ -44,17 +44,17 @@ class Mutation:
             return rca(data=None, err=str(e))
 
     @strawberry.mutation
-    async def update_category(self, data: ipuca) -> rca:
+    async def update_category(self, data: ipuca, categoryID: str) -> rca:
         try:
             encode_data = encode_input(data.__dict__)
-            get_cat = await Category.get(encode_data["categoryID"], fetch_links=True)
+            get_cat = await Category.get(categoryID, fetch_links=True)
             if get_cat:
                 cat_updated = await get_cat.update({"$set": encode_data})
                 return rca(data=cat_updated, err=None)
             else:
                 return rca(
                     data=None,
-                    err=f"No Category found with categoryID {encode_data['categoryID']}",
+                    err=f"No Category found with categoryID {categoryID}",
                 )
         except Exception as e:
             return rca(data=None, err=str(e))

@@ -21,9 +21,9 @@ class InputWishlist:
     productID: str
 
 
-@strawberry.input
-class InputUpdateWishlist:
-    wishlistID: str
+# @strawberry.input
+# class InputUpdateWishlist:
+#     pass
 
 
 @strawberry.type

@@ -23,7 +23,6 @@ class InputCategory:
 class InputUpdateCategory:
     name: Optional[str]
     categoryImage: Optional[list[str]]
-    categoryID: str
 
 
 @strawberry.type

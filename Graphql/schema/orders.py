@@ -21,9 +21,9 @@ class InputOrders:
     productID: str
 
 
-@strawberry.input
-class InputUpdateOrders:
-    reviewID: str
+# @strawberry.input
+# class InputUpdateOrders:
+#     pass
 
 
 @strawberry.type

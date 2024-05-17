@@ -3,7 +3,7 @@ from models.dbschema import Wishlist, User, Product
 from Graphql.schema.wishlist import (
     ResponseWishlist as rwi,
     InputWishlist as ipwi,
-    InputUpdateWishlist as ipuwi,
+    # InputUpdateWishlist as ipuwi,
 )
 from helper.utils import encode_input
 
@@ -42,20 +42,18 @@ class Mutation:
         except Exception as e:
             return rwi(data=None, err=str(e))
 
-    @strawberry.mutation
-    async def update_wish(self, data: ipuwi) -> rwi:
-        try:
-            encoded_data = encode_input(data.__dict__)
-            get_wish = await Wishlist.get(encoded_data["wishID"])
-            if get_wish:
-                wish_updated = await get_wish.update({"$set": encoded_data})
-                return rwi(data=wish_updated, err=None)
-            else:
-                return rwi(
-                    data=None, err=f"No wish with wishID {encoded_data['wishID']}"
-                )
-        except Exception as e:
-            return rwi(data=None, err=str(e))
+    # @strawberry.mutation
+    # async def update_wish(self, data: ipuwi, wishID: str) -> rwi:
+    #     try:
+    #         encoded_data = encode_input(data.__dict__)
+    #         get_wish = await Wishlist.get(wishID)
+    #         if get_wish:
+    #             wish_updated = await get_wish.update({"$set": encoded_data})
+    #             return rwi(data=wish_updated, err=None)
+    #         else:
+    #             return rwi(data=None, err=f"No wish with wishID {wishID}")
+    #     except Exception as e:
+    #         return rwi(data=None, err=str(e))
 
     @strawberry.mutation
     async def delete_wish(self, wishID: str) -> rwi:
