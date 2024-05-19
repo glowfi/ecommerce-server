@@ -1,23 +1,43 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from config.connection import beanie_connection
+from Redis.connection import redis_connection
 import strawberry
 from Graphql.mutation import Mutation
 from Graphql.query import Query
 from strawberry.fastapi import GraphQLRouter
 import uvicorn
 
+# Redis Client string
+redis_client = {"client": None}
+
+
+# Custom ctx_getter
+def custom_context_dependency() -> dict:
+    return redis_client
+
+
+async def get_context(
+    custom_value=Depends(custom_context_dependency),
+):
+    return {
+        "redis_client": custom_value["client"],
+    }
+
 
 # Lifespan startup and shutdown
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Connect with beanie
+    # Connect with beanie and redis
     await beanie_connection.connect()
+    await redis_connection.connect()
+    redis_client["client"] = redis_connection.client
 
     yield
 
-    # Close beanie connection
+    # Close beanie and redis connection
     await beanie_connection.disconnect()
+    await redis_connection.disconnect()
 
 
 # FastAPI app
@@ -34,7 +54,9 @@ def home():
 
 # Add graphql endpoint
 schema = strawberry.Schema(query=Query, mutation=Mutation)
-graphql_app = GraphQLRouter(schema, graphql_ide="apollo-sandbox")
+graphql_app = GraphQLRouter(
+    schema, graphql_ide="apollo-sandbox", context_getter=get_context
+)
 app.include_router(graphql_app, prefix="/graphql")
 
 

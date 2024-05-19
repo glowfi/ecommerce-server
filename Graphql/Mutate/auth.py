@@ -76,6 +76,8 @@ class Mutation:
                     detail, REFRESH_TOKEN_EXPIRE_MINUTES
                 )
                 res = info.context["response"]
+                redis = info.context["redis_client"]
+                await redis.set("accToken", accToken)
                 res.headers["Authorization"] = accToken
                 res.set_cookie(
                     "refreshToken", refToken, httponly=True, samesite="strict"
