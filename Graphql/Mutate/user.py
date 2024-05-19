@@ -6,7 +6,7 @@ from Graphql.schema.user import (
     InputUpdateUser as ipuu,
 )
 import json
-from helper.utils import encode_input
+from helper.utils import encode_input, validate_inputs
 
 
 @strawberry.type
@@ -26,6 +26,13 @@ class Mutation:
     async def create_user(self, data: ipu) -> ru:
         try:
             encoded_data = encode_input(data.__dict__)
+            if not encoded_data["email"] or not encoded_data["password"]:
+                return ru(data=None, err="Please provide a valid input")
+
+            res = await validate_inputs(encoded_data["email"], encoded_data["password"])
+            if not res[0]:
+                return ru(data=None, err=res[1])
+
             new_user = User(**encoded_data)
             user_ins = await new_user.insert()
             return ru(data=user_ins, err=None)
@@ -34,7 +41,7 @@ class Mutation:
             return ru(data=None, err=str(e))
 
     @strawberry.mutation
-    async def update_user(self, data: ipu, userID: str) -> ru:
+    async def update_user(self, data: ipuu, userID: str) -> ru:
         try:
             encoded_data = encode_input(data.__dict__)
             get_user = await User.get(userID)

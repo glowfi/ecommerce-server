@@ -21,8 +21,8 @@ class InputCategory:
 
 @strawberry.input
 class InputUpdateCategory:
-    name: Optional[str]
-    categoryImage: Optional[list[str]]
+    name: Optional[str] = strawberry.field(default_factory=str)
+    categoryImage: Optional[list[str]] = strawberry.field(default_factory=list)
 
 
 @strawberry.type

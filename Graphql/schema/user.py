@@ -27,19 +27,19 @@ class InputUser:
     email: str
     name: str
     password: str
-    dob: str
-    phone_number: str
-    address: str
+    dob: Optional[str] = strawberry.field(default_factory=str)
+    phone_number: Optional[str] = strawberry.field(default_factory=str)
+    address: Optional[str] = strawberry.field(default_factory=str)
 
 
 @strawberry.input
 class InputUpdateUser:
-    email: Optional[str]
-    name: Optional[str]
-    password: Optional[str]
-    dob: Optional[str]
-    phone_number: Optional[str]
-    address: Optional[str]
+    email: Optional[str] = strawberry.field(default_factory=str)
+    name: Optional[str] = strawberry.field(default_factory=str)
+    password: Optional[str] = strawberry.field(default_factory=str)
+    dob: Optional[str] = strawberry.field(default_factory=str)
+    phone_number: Optional[str] = strawberry.field(default_factory=str)
+    address: Optional[str] = strawberry.field(default_factory=str)
 
 
 @strawberry.type

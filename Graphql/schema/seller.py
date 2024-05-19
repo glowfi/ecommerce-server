@@ -34,15 +34,14 @@ class InputSeller:
 
 @strawberry.input
 class InputUpdateSeller:
-    id: Optional[str]
-    email: Optional[str]
-    phone_number: Optional[str]
-    dob: Optional[str]
-    password: Optional[str]
-    company_name: Optional[str]
-    company_address: Optional[str]
-    country: Optional[str]
-    seller_name: Optional[str]
+    email: Optional[str] = strawberry.field(default_factory=str)
+    phone_number: Optional[str] = strawberry.field(default_factory=str)
+    dob: Optional[str] = strawberry.field(default_factory=str)
+    password: Optional[str] = strawberry.field(default_factory=str)
+    company_name: Optional[str] = strawberry.field(default_factory=str)
+    company_address: Optional[str] = strawberry.field(default_factory=str)
+    country: Optional[str] = strawberry.field(default_factory=str)
+    seller_name: Optional[str] = strawberry.field(default_factory=str)
 
 
 @strawberry.type
