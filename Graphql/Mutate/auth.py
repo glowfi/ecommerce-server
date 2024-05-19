@@ -1,5 +1,13 @@
 import strawberry
 from models.dbschema import Admin, Seller, User
+from Middleware.jwtmanager import JWTManager
+from dotenv import find_dotenv, load_dotenv
+import os
+
+
+# Load dotenv
+load_dotenv(find_dotenv(".env"))
+REFRESH_TOKEN_EXPIRE_MINUTES = os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES")
 
 
 @strawberry.input
@@ -12,6 +20,7 @@ class Data:
 @strawberry.type
 class Login:
     id: str
+    accToken: str
     email: str
     userType: str
 
@@ -40,7 +49,7 @@ async def checkUserExists(email, userType):
 class Mutation:
 
     @strawberry.mutation
-    async def login(self, data: Data) -> LoginResponse:
+    async def login(self, data: Data, info: strawberry.Info) -> LoginResponse:
         if data.userType.lower() not in ["admin", "seller", "user"]:
             return LoginResponse(
                 data=None, err="userType mut be admin or seller or user"
@@ -55,9 +64,22 @@ class Mutation:
                 )
 
             else:
-                details = Login(
-                    id=res[0].id,
-                    email=data.email,
-                    userType=data.userType,
+                # Generate Token
+                detail = {
+                    "id": str(res[0].id),
+                    "email": data.email,
+                    "userType": data.userType,
+                }
+                accToken = JWTManager.generate_token(detail)
+                detail["accToken"] = accToken
+                refToken = JWTManager.generate_token(
+                    detail, REFRESH_TOKEN_EXPIRE_MINUTES
                 )
+                res = info.context["response"]
+                res.headers["Authorization"] = accToken
+                res.set_cookie(
+                    "refreshToken", refToken, httponly=True, samesite="strict"
+                )
+
+                details = Login(**detail)
                 return LoginResponse(data=details, err=None)
