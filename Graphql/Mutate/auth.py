@@ -63,6 +63,9 @@ class Mutation:
                     err=f"No such user with email {data.email} exists as {data.userType}",
                 )
 
+            elif res[0].password != data.password:
+                return LoginResponse(data=None, err=f"Wrong Password entered!")
+
             else:
                 # Generate Token
                 detail = {
