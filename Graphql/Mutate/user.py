@@ -26,13 +26,6 @@ class Mutation:
     async def create_user(self, data: ipu) -> ru:
         try:
             encoded_data = encode_input(data.__dict__)
-            if not encoded_data["email"] or not encoded_data["password"]:
-                return ru(data=None, err="Please provide a valid input")
-
-            res = await validate_inputs(encoded_data["email"], encoded_data["password"])
-            if not res[0]:
-                return ru(data=None, err=res[1])
-
             new_user = User(**encoded_data)
             user_ins = await new_user.insert()
             return ru(data=user_ins, err=None)

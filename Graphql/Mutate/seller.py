@@ -28,13 +28,6 @@ class Mutation:
     async def create_seller(self, data: ipse) -> rse:
         try:
             encoded_data = encode_input(data.__dict__)
-            if not encoded_data["email"] or not encoded_data["password"]:
-                return rse(data=None, err="Please provide a valid input")
-
-            res = await validate_inputs(encoded_data["email"], encoded_data["password"])
-            if not res[0]:
-                return rse(data=None, err=res[1])
-
             new_seller = Seller(**encoded_data)
             seller_ins = await new_seller.insert()
             return rse(data=seller_ins, err=None)

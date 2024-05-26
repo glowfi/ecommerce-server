@@ -17,6 +17,6 @@ class Mutation:
         if not res[0]:
             return rad(data=None, err=res[1])
         else:
-            new_admin = Admin(**data.__dict__)
+            new_admin = Admin(**encoded_data)
             ins_admin = await new_admin.insert()
             return rad(data=ins_admin, err=None)
