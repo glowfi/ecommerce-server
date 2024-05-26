@@ -2,7 +2,7 @@
 
 # Cleanup
 rm -rf env
-fd . | grep *__pycache__/ | xargs -I "{}" rm -rf "{}"
+bash -c 'fd . | grep *__pycache__/ | xargs -I "{}" rm -rf "{}"'
 
 # Install
 python -m venv env
