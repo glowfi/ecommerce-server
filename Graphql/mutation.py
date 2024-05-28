@@ -8,6 +8,7 @@ from Graphql.Mutate.reviews import Mutation as reviewsMutation
 from Graphql.Mutate.wishlist import Mutation as wishlistMutation
 from Graphql.Mutate.admin import Mutation as adminMutation
 from Graphql.Mutate.auth import Mutation as authMutation
+from Graphql.Mutate.forgotpassword import Mutation as forgetPasswordMutation
 
 
 @strawberry.type
@@ -21,6 +22,7 @@ class Mutation(
     wishlistMutation,
     authMutation,
     adminMutation,
+    forgetPasswordMutation,
 ):
     @strawberry.mutation
     async def hello() -> str:

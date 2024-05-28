@@ -1,8 +1,10 @@
 import strawberry
-from models.dbschema import Admin, Seller, User
+from Graphql.schema.auth import InputLogin, LoginResponse
 from Middleware.jwtmanager import JWTManager
 from dotenv import find_dotenv, load_dotenv
 import os
+
+from helper.utils import checkUserExists
 
 
 # Load dotenv
@@ -10,46 +12,11 @@ load_dotenv(find_dotenv(".env"))
 REFRESH_TOKEN_EXPIRE_MINUTES = os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES")
 
 
-@strawberry.input
-class Data:
-    email: str
-    password: str
-    userType: str
-
-
-@strawberry.type
-class Login:
-    id: str
-    accToken: str
-    email: str
-    userType: str
-
-
-@strawberry.type
-class LoginResponse:
-    data: Login | None
-    err: str | None
-
-
-@strawberry.type
-class RegisterResponse(LoginResponse):
-    pass
-
-
-async def checkUserExists(email, userType):
-    if userType == "admin":
-        return await Admin.find({"email": email}).to_list()
-    elif userType == "seller":
-        return await Seller.find({"email": email}).to_list()
-    elif userType == "user":
-        return await User.find({"email": email}).to_list()
-
-
 @strawberry.type
 class Mutation:
 
     @strawberry.mutation
-    async def login(self, data: Data, info: strawberry.Info) -> LoginResponse:
+    async def login(self, data: InputLogin, info: strawberry.Info) -> LoginResponse:
         if data.userType.lower() not in ["admin", "seller", "user"]:
             return LoginResponse(
                 data=None, err="userType mut be admin or seller or user"
@@ -86,5 +53,5 @@ class Mutation:
                     "refreshToken", refToken, httponly=True, samesite="strict"
                 )
 
-                details = Login(**detail)
+                details = LoginResponse(**detail)
                 return LoginResponse(data=details, err=None)

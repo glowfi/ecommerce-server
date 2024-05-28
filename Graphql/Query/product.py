@@ -8,7 +8,8 @@ class Query:
     @strawberry.field
     async def get_all_products() -> rgpr:
         try:
-            allProducts = await Product.find_many(fetch_links=True, limit=10).to_list()
+            # allProducts = await Product.find_many(fetch_links=True, limit=10).to_list()
+            allProducts = await Product.find_many(fetch_links=True).to_list()
             return rgpr(data=allProducts, err=None)
         except Exception as e:
             return rgpr(data=None, err=str(e))

@@ -6,7 +6,6 @@ from Graphql.schema.seller import (
     InputSeller as ipse,
     InputUpdateSeller as ipuse,
 )
-from helper.utils import encode_input, validate_inputs
 
 
 @strawberry.type

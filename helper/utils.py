@@ -1,5 +1,7 @@
 from fastapi.encoders import jsonable_encoder
 from email_validator import validate_email, EmailNotValidError
+from models.dbschema import Admin, Seller, User
+import random
 
 # Encode Inputs
 
@@ -11,6 +13,22 @@ def encode_input(data) -> dict:
         if v:
             tmp[k] = v
     return tmp
+
+
+def generate_random_number(length):
+    return int("".join([str(random.randint(0, 10)) for _ in range(length)]))
+
+
+# Helper function checkUserExists
+
+
+async def checkUserExists(email, userType):
+    if userType == "admin":
+        return await Admin.find({"email": email}).to_list()
+    elif userType == "seller":
+        return await Seller.find({"email": email}).to_list()
+    elif userType == "user":
+        return await User.find({"email": email}).to_list()
 
 
 # Validate Email & Password

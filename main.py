@@ -7,6 +7,7 @@ from Graphql.mutation import Mutation
 from Graphql.query import Query
 from strawberry.fastapi import GraphQLRouter
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
 # Redis Client string
 redis_client = {"client": None}
@@ -43,6 +44,19 @@ async def lifespan(app: FastAPI):
 # FastAPI app
 app = FastAPI(
     title="Ecommerce", description="Fast API", version="1.0.0", lifespan=lifespan
+)
+
+# Cors
+origins = [
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

@@ -99,3 +99,11 @@ class Reviews(Document):
     user_reviewed: Link["User"]
     product_reviewed: Link["Product"]
     orderedAt: datetime = Field(default=datetime.now())
+
+
+class OTP(Document):
+    userID: str
+    token: str
+    attempts: int = Field(default=0)
+    lastUsed: datetime = Field(default=datetime.now())
+    isBlocked: bool = Field(default=False)
