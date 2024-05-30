@@ -10,7 +10,7 @@ class InputLogin:
 
 @strawberry.type
 class Login:
-    id: str
+    userID: str
     accToken: str
     email: str
     userType: str

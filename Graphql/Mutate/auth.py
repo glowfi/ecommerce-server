@@ -1,5 +1,5 @@
 import strawberry
-from Graphql.schema.auth import InputLogin, LoginResponse
+from Graphql.schema.auth import InputLogin, Login, LoginResponse
 from Middleware.jwtmanager import JWTManager
 from dotenv import find_dotenv, load_dotenv
 import os
@@ -36,7 +36,7 @@ class Mutation:
             else:
                 # Generate Token
                 detail = {
-                    "id": str(res[0].id),
+                    "userID": str(res[0].id),
                     "email": data.email,
                     "userType": data.userType,
                 }
@@ -53,5 +53,5 @@ class Mutation:
                     "refreshToken", refToken, httponly=True, samesite="strict"
                 )
 
-                details = LoginResponse(**detail)
+                details = Login(**detail)
                 return LoginResponse(data=details, err=None)
