@@ -38,6 +38,8 @@ class Mutation:
                 detail = {
                     "userID": str(res[0].id),
                     "email": data.email,
+                    "profile_pic": res[0].profile_pic,
+                    "name": res[0].name,
                     "userType": data.userType,
                 }
                 accToken = JWTManager.generate_token(detail)

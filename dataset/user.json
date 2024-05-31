@@ -1,132 +1,142 @@
 [
     {
-        "email": "clifford50@example.org",
-        "name": "Robert Rhodes",
-        "password": "35+iJoWoW6LU",
-        "dob": "1990-05-15",
-        "phone_number": "(562)772-7015x03459",
+        "email": "timothygreen@example.net",
+        "name": "James Martinez",
+        "password": "n6HBGjNB)3&M",
+        "dob": "1921-07-20",
+        "phone_number": "990-946-0220",
         "address": {
-            "street_address": "461 Medina Ferry",
-            "city": "Andrewton",
+            "street_address": "44434 Strickland Plaza Suite 517",
+            "city": "Burkeport",
+            "state": "California",
+            "zip_code": "21401"
+        },
+        "profile_pic": "https://ui.shadcn.com/avatars/03.png"
+    },
+    {
+        "email": "gcopeland@example.com",
+        "name": "Jennifer Graham",
+        "password": "^Y3zj0Suq!%@",
+        "dob": "2004-04-02",
+        "phone_number": "462.730.7945",
+        "address": {
+            "street_address": "292 Petersen Crossing",
+            "city": "Davistown",
             "state": "Oregon",
-            "zip_code": "70306"
-        }
+            "zip_code": "80457"
+        },
+        "profile_pic": "https://ui.shadcn.com/avatars/03.png"
     },
     {
-        "email": "shermanjohn@example.org",
-        "name": "Cynthia Gardner",
-        "password": "#0iy9(vPm^CW",
-        "dob": "2003-09-18",
-        "phone_number": "+1-780-595-8108x45146",
+        "email": "hdiaz@example.com",
+        "name": "Walter Vega",
+        "password": "N%hkOQkwsK7P",
+        "dob": "1996-06-08",
+        "phone_number": "(311)890-9265x80605",
         "address": {
-            "street_address": "663 Smith Drives Apt. 803",
-            "city": "Shannonfort",
-            "state": "Maine",
-            "zip_code": "36465"
-        }
+            "street_address": "32233 Allen Locks Suite 651",
+            "city": "Port Cory",
+            "state": "New Mexico",
+            "zip_code": "16585"
+        },
+        "profile_pic": "https://ui.shadcn.com/avatars/01.png"
     },
     {
-        "email": "brendaaguirre@example.com",
-        "name": "Steven Key",
-        "password": "Y4f_tcm%@VZR",
-        "dob": "1954-08-17",
-        "phone_number": "671.724.4626x19171",
+        "email": "ninabarnett@example.net",
+        "name": "Paul Griffin",
+        "password": "cp!0UzKTO$XU",
+        "dob": "1992-07-12",
+        "phone_number": "+1-490-936-3359x077",
         "address": {
-            "street_address": "7763 Gregory Plaza Suite 783",
-            "city": "Joneschester",
-            "state": "Idaho",
-            "zip_code": "00638"
-        }
-    },
-    {
-        "email": "danny61@example.net",
-        "name": "Mark Sanders",
-        "password": "c&3fuaL09jqC",
-        "dob": "1995-06-12",
-        "phone_number": "804-377-5332x670",
-        "address": {
-            "street_address": "037 Lane Union Suite 413",
-            "city": "Harperfort",
-            "state": "North Carolina",
-            "zip_code": "79078"
-        }
-    },
-    {
-        "email": "hopkinsheather@example.com",
-        "name": "James Sims",
-        "password": "cZS9GsjxpJ^e",
-        "dob": "1996-01-25",
-        "phone_number": "001-686-234-6817x015",
-        "address": {
-            "street_address": "39281 Amber Inlet",
-            "city": "Claudiatown",
-            "state": "Oklahoma",
-            "zip_code": "48036"
-        }
-    },
-    {
-        "email": "rachelyoung@example.net",
-        "name": "Jennifer Henry",
-        "password": "ESz&!2q&2RvJ",
-        "dob": "2017-12-04",
-        "phone_number": "(249)751-5384",
-        "address": {
-            "street_address": "81459 Alan Pass Suite 896",
-            "city": "Port Caitlinhaven",
-            "state": "Hawaii",
-            "zip_code": "71363"
-        }
-    },
-    {
-        "email": "steve63@example.com",
-        "name": "Lauren Thomas",
-        "password": "Rx87*q(B0%JA",
-        "dob": "1994-06-18",
-        "phone_number": "+1-408-375-2195x930",
-        "address": {
-            "street_address": "975 Theresa Stream Apt. 256",
-            "city": "North Joshuaton",
-            "state": "South Carolina",
-            "zip_code": "93216"
-        }
-    },
-    {
-        "email": "jackie42@example.net",
-        "name": "Jasmine Sims",
-        "password": "g40tIekJ%ow7",
-        "dob": "1993-07-11",
-        "phone_number": "784-205-9505",
-        "address": {
-            "street_address": "48434 Keith Corners",
-            "city": "South Kelly",
-            "state": "Hawaii",
-            "zip_code": "70787"
-        }
-    },
-    {
-        "email": "jwilliams@example.org",
-        "name": "Valerie Garner",
-        "password": "5oBS43dB&7rq",
-        "dob": "2006-02-11",
-        "phone_number": "4065471322",
-        "address": {
-            "street_address": "9002 Patel Corners Apt. 424",
-            "city": "Lake Lauraland",
-            "state": "Connecticut",
-            "zip_code": "63513"
-        }
-    },
-    {
-        "email": "griffinkristen@example.net",
-        "name": "Kimberly Sellers",
-        "password": "PRxOk7Yv^6H%",
-        "dob": "1924-01-13",
-        "phone_number": "001-822-561-3529x0751",
-        "address": {
-            "street_address": "65281 Heath Stravenue",
-            "city": "Port Brandistad",
+            "street_address": "060 Thomas Point",
+            "city": "Kathleenmouth",
             "state": "New Jersey",
-            "zip_code": "13429"
-        }
+            "zip_code": "73470"
+        },
+        "profile_pic": "https://ui.shadcn.com/avatars/03.png"
+    },
+    {
+        "email": "hector77@example.net",
+        "name": "Keith Wagner",
+        "password": "@%60N_hwi(T4",
+        "dob": "1924-12-04",
+        "phone_number": "273.612.5175x464",
+        "address": {
+            "street_address": "45219 Nixon Run",
+            "city": "Lake Stevenstad",
+            "state": "Washington",
+            "zip_code": "98029"
+        },
+        "profile_pic": "https://ui.shadcn.com/avatars/01.png"
+    },
+    {
+        "email": "andersonmatthew@example.net",
+        "name": "Jennifer Vance",
+        "password": "E@oYb0zvSE6S",
+        "dob": "1961-02-06",
+        "phone_number": "539.836.9281",
+        "address": {
+            "street_address": "0990 Clayton Stream",
+            "city": "Port Brandyport",
+            "state": "New Hampshire",
+            "zip_code": "53330"
+        },
+        "profile_pic": "https://ui.shadcn.com/avatars/01.png"
+    },
+    {
+        "email": "larry08@example.com",
+        "name": "Amy Duncan",
+        "password": "6&ZNte!J_t7V",
+        "dob": "1909-03-11",
+        "phone_number": "421-813-0902",
+        "address": {
+            "street_address": "5630 Beasley Stravenue Suite 471",
+            "city": "East Emily",
+            "state": "Virginia",
+            "zip_code": "05231"
+        },
+        "profile_pic": "https://ui.shadcn.com/avatars/01.png"
+    },
+    {
+        "email": "gray@example.com",
+        "name": "Christopher Davis",
+        "password": "h!1Byf9M^l0)",
+        "dob": "1956-03-04",
+        "phone_number": "655-825-7149x1130",
+        "address": {
+            "street_address": "137 Chad Skyway",
+            "city": "Matthewborough",
+            "state": "Montana",
+            "zip_code": "61123"
+        },
+        "profile_pic": "https://ui.shadcn.com/avatars/01.png"
+    },
+    {
+        "email": "egutierrez@example.org",
+        "name": "Jasmine Murray",
+        "password": "D#Z#Gh(d3k#0",
+        "dob": "1911-09-14",
+        "phone_number": "001-745-379-8500x6099",
+        "address": {
+            "street_address": "66032 Roberts Pass Apt. 299",
+            "city": "Susanmouth",
+            "state": "Washington",
+            "zip_code": "07264"
+        },
+        "profile_pic": "https://ui.shadcn.com/avatars/01.png"
+    },
+    {
+        "email": "mwilkerson@example.org",
+        "name": "Spencer Lang",
+        "password": "P6%ieARy&iQs",
+        "dob": "1974-09-13",
+        "phone_number": "(421)880-2071",
+        "address": {
+            "street_address": "1660 Blevins Ville Suite 084",
+            "city": "East Evan",
+            "state": "Florida",
+            "zip_code": "71078"
+        },
+        "profile_pic": "https://ui.shadcn.com/avatars/01.png"
     }
 ]

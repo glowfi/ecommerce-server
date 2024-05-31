@@ -1,3 +1,5 @@
+import random
+from typing import Optional
 from beanie import Document, Link, BackLink, Indexed
 from datetime import datetime
 from pydantic import BaseModel, Field
@@ -14,9 +16,10 @@ class User(Document):
     email: Indexed(str, unique=True)
     name: str
     password: str
-    dob: str
-    phone_number: str
-    address: Address
+    dob: Optional[str] = Field(default_factory=str)
+    phone_number: Optional[str] = Field(default_factory=str)
+    address: Optional[Address] = Field(default_factory=dict)
+    profile_pic: Optional[str] = Field(default_factory=str)
     wishlist: list[BackLink["Wishlist"]] = Field(
         json_schema_extra={"original_field": "user_wished"}, default_factory=list
     )
@@ -38,6 +41,7 @@ class Seller(Document):
     phone_number: str
     dob: str
     password: str
+    profile_pic: Optional[str] = Field(default_factory=str)
     company_name: str
     company_address: Address
     country: str

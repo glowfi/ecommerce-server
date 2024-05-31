@@ -13,6 +13,8 @@ class Login:
     userID: str
     accToken: str
     email: str
+    profile_pic: str
+    name: str
     userType: str
 
 

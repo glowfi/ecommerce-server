@@ -6,6 +6,11 @@ import json
 
 fake = Faker()
 
+pics = []
+for i in range(1, 5):
+    if i == 1 or i == 3 or i == 5:
+        pics.append(f"https://ui.shadcn.com/avatars/0{i}.png")
+
 
 class Seller:
     def __init__(self):
@@ -43,6 +48,7 @@ for prod in data:
         "company_address": seller.company_address,
         "country": seller.country,
         "seller_name": seller.seller_name,
+        "profile_pic": random.choice(pics),
     }
 
 
@@ -64,6 +70,7 @@ for i in range(10):
             "state": fake.state(),
             "zip_code": fake.zipcode(),
         },
+        "profile_pic": random.choice(pics),
     }
 
     user_data.append(tmp)

@@ -108,16 +108,3 @@ class Mutation:
                 )
         except Exception as e:
             return rpr(data=None, err=str(e))
-
-    @strawberry.mutation
-    async def get_product_by_id(self, productID: str) -> rpr:
-        try:
-            prod = await Product.get(productID, fetch_links=True)
-            if prod:
-                return rpr(data=prod, err=None)
-            else:
-                return rpr(
-                    data=None, err=f"No product found with productID {productID}"
-                )
-        except Exception as e:
-            return rpr(data=None, err=str(e))
