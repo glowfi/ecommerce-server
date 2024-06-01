@@ -30,6 +30,11 @@ class Mutation:
                     err=f"No such user with email {data.email} exists as {data.userType}",
                 )
 
+            elif not res[0].confirmed:
+                return LoginResponse(
+                    data=None, err=f"Verify your account before logging in!"
+                )
+
             elif res[0].password != data.password:
                 return LoginResponse(data=None, err=f"Wrong Password entered!")
 
@@ -42,9 +47,9 @@ class Mutation:
                     "name": res[0].name,
                     "userType": data.userType,
                 }
-                accToken = JWTManager.generate_token(detail)
+                accToken = await JWTManager.generate_token(detail)
                 detail["accToken"] = accToken
-                refToken = JWTManager.generate_token(
+                refToken = await JWTManager.generate_token(
                     detail, REFRESH_TOKEN_EXPIRE_MINUTES
                 )
                 res = info.context["response"]

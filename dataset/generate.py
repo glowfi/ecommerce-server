@@ -28,9 +28,9 @@ class Seller:
             "street_address": fake.street_address(),
             "city": fake.city(),
             "state": fake.state(),
+            "country": fake.country(),
             "zip_code": fake.zipcode(),
         }
-        self.country = fake.country()
         self.seller_name = f"{fake.first_name()} {fake.last_name()}"
 
 
@@ -46,7 +46,6 @@ for prod in data:
         "password": seller.password,
         "company_name": seller.company_name,
         "company_address": seller.company_address,
-        "country": seller.country,
         "seller_name": seller.seller_name,
         "profile_pic": random.choice(pics),
     }
@@ -68,6 +67,7 @@ for i in range(10):
             "street_address": fake.street_address(),
             "city": fake.city(),
             "state": fake.state(),
+            "country": fake.country(),
             "zip_code": fake.zipcode(),
         },
         "profile_pic": random.choice(pics),

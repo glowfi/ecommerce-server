@@ -6,6 +6,8 @@ from Graphql.Query.user import Query as userQuery
 from Graphql.Query.wishlist import Query as wishlistQuery
 from Graphql.Query.orders import Query as ordersQuery
 from Graphql.Query.reviews import Query as reviewsQuery
+from Graphql.Query.otp import Query as otpQuery
+from Graphql.Query.confirmaccount import Query as confirmaccountQuery
 
 
 @strawberry.type
@@ -17,6 +19,8 @@ class Query(
     wishlistQuery,
     ordersQuery,
     reviewsQuery,
+    otpQuery,
+    confirmaccountQuery,
 ):
     @strawberry.field
     async def hello() -> str:

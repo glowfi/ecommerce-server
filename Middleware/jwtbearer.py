@@ -14,7 +14,7 @@ REFRESH_TOKEN_EXPIRE_MINUTES = os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES")
 class IsAuthenticated(BasePermission):
     message = "User is not Authenticated"
 
-    def has_permission(self, source: typing.Any, info: Info, **kwargs) -> bool:
+    async def has_permission(self, source: typing.Any, info: Info, **kwargs) -> bool:
 
         # Get request,response object
         request = info.context["request"]
@@ -24,7 +24,7 @@ class IsAuthenticated(BasePermission):
         authentication = request.headers["authentication"]
         if authentication:
             token = authentication.split("Bearer ")[-1]
-            isverified = JWTManager.verify_jwt(token)
+            isverified = await JWTManager.verify_jwt(token)
             if isverified:
                 return True
             else:
@@ -32,12 +32,12 @@ class IsAuthenticated(BasePermission):
                 if not refToken:
                     return False
                 else:
-                    isRefTokenValid = JWTManager.verify_jwt(refToken)
+                    isRefTokenValid = await JWTManager.verify_jwt(refToken)
                     if not isRefTokenValid:
                         return False
                     else:
-                        accToken = JWTManager.generate_token({})
-                        refToken = JWTManager.generate_token(
+                        accToken = await JWTManager.generate_token({})
+                        refToken = await JWTManager.generate_token(
                             {}, REFRESH_TOKEN_EXPIRE_MINUTES
                         )
                         res.headers["Authorization"] = accToken

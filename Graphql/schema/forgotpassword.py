@@ -5,12 +5,17 @@ import strawberry
 class InputForgotPassword:
     email: str
     userType: str
+    browser: str
+    os: str
 
 
 @strawberry.type
 class ForgotPassword:
     email: str
     userType: str
+    browser: str
+    os: str
+    token: str
 
 
 @strawberry.type

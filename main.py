@@ -1,4 +1,6 @@
 from contextlib import asynccontextmanager
+import os
+from dotenv import find_dotenv, load_dotenv
 from fastapi import FastAPI, Depends
 from config.connection import beanie_connection
 from Redis.connection import redis_connection
@@ -8,6 +10,10 @@ from Graphql.query import Query
 from strawberry.fastapi import GraphQLRouter
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
+
+# Read dotenv
+load_dotenv(find_dotenv(".env"))
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 # Redis Client string
 redis_client = {"client": None}
@@ -48,7 +54,7 @@ app = FastAPI(
 
 # Cors
 origins = [
-    "http://localhost:3000",
+    str(FRONTEND_URL),
 ]
 
 app.add_middleware(

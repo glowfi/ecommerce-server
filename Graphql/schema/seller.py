@@ -12,6 +12,7 @@ class Seller:
     id: str
     email: str
     phone_number: str
+    confirmed: bool
     dob: str
     password: str
     company_name: str
@@ -31,7 +32,6 @@ class InputSeller:
     password: str
     company_name: str
     company_address: AddressInput = strawberry.field(default_factory=dict)
-    country: str
     seller_name: str
     profile_pic: Optional[str] = strawberry.field(default_factory=str)
 
@@ -45,7 +45,6 @@ class InputUpdateSeller:
     password: Optional[str] = strawberry.field(default_factory=str)
     company_name: Optional[str] = strawberry.field(default_factory=str)
     company_address: Optional[AddressInput] = strawberry.field(default_factory=dict)
-    country: Optional[str] = strawberry.field(default_factory=str)
     seller_name: Optional[str] = strawberry.field(default_factory=str)
 
 

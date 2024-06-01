@@ -1,4 +1,7 @@
+import os
 import strawberry
+from Middleware.jwtmanager import JWTManager
+from helper.sendmail import send_mail
 from helper.utils import encode_input
 from models.dbschema import User
 from Graphql.schema.user import (
@@ -7,6 +10,14 @@ from Graphql.schema.user import (
     InputUpdateUser as ipuu,
 )
 import json
+from dotenv import load_dotenv, find_dotenv
+from helper.confirm_email import html_content_confirm_email
+
+# Load dotenv
+load_dotenv(find_dotenv(".env"))
+OTP_TOKEN_EXPIRE_MINUTES = os.getenv("OTP_TOKEN_EXPIRE_MINUTES")
+STORE_NAME = os.getenv("STORE_NAME")
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 
 @strawberry.type
@@ -23,11 +34,37 @@ class Mutation:
         return "Done!"
 
     @strawberry.mutation
-    async def create_user(self, data: ipu) -> ru:
+    async def create_user(self, data: ipu, info: strawberry.Info) -> ru:
         try:
             encoded_data = encode_input(data.__dict__)
             new_user = User(**encoded_data)
             user_ins = await new_user.insert()
+
+            # Generate Token
+            userID = str(new_user.id)
+            token = await JWTManager.generate_token(
+                {"user_ID": userID}, str(OTP_TOKEN_EXPIRE_MINUTES)
+            )
+
+            # Get email template
+            html_content = (
+                html_content_confirm_email.replace("{{name}}", str(new_user.name))
+                .replace("{{action_url}}", f"{FRONTEND_URL}/auth/verifyaccount/{token}")
+                .replace("[Product Name]", str(STORE_NAME))
+                .replace("{{support_url}}", "")
+                .replace("[Company Name, LLC]", f"{STORE_NAME} LLC")
+            )
+
+            # Send email
+            info.context["background_tasks"].add_task(
+                send_mail,
+                {
+                    "to": [encoded_data["email"]],
+                    "subject": "Account Confirmation",
+                    "body": html_content,
+                },
+            )
+
             return ru(data=user_ins, err=None)
 
         except Exception as e:

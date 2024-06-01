@@ -13,6 +13,7 @@ class Address:
     street_address: str
     city: str
     state: str
+    country: str
     zip_code: str
 
 
@@ -20,6 +21,7 @@ class Address:
 class AddressInput:
     street_address: Optional[str] = strawberry.field(default_factory=str)
     city: Optional[str] = strawberry.field(default_factory=str)
+    country: Optional[str] = strawberry.field(default_factory=str)
     state: Optional[str] = strawberry.field(default_factory=str)
     zip_code: Optional[str] = strawberry.field(default_factory=str)
 
@@ -28,6 +30,7 @@ class AddressInput:
 class User:
     id: str
     email: str
+    confirmed: bool
     profile_pic: str
     name: str
     password: str

@@ -23,6 +23,7 @@ class MailBody(BaseModel):
 
 
 def send_mail(data: dict | None = None):
+    print("Entered!")
     msg = MailBody(**data)
     message = MIMEText(msg.body, "html")
     message["From"] = str(EMAIL) + "@resend.com"

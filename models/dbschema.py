@@ -9,6 +9,7 @@ class Address(BaseModel):
     street_address: str
     city: str
     state: str
+    country: str
     zip_code: str
 
 
@@ -20,6 +21,7 @@ class User(Document):
     phone_number: Optional[str] = Field(default_factory=str)
     address: Optional[Address] = Field(default_factory=dict)
     profile_pic: Optional[str] = Field(default_factory=str)
+    confirmed: Optional[bool] = Field(default=False)
     wishlist: list[BackLink["Wishlist"]] = Field(
         json_schema_extra={"original_field": "user_wished"}, default_factory=list
     )
@@ -39,12 +41,12 @@ class Admin(Document):
 class Seller(Document):
     email: Indexed(str, unique=True)
     phone_number: str
+    confirmed: Optional[bool] = Field(default=False)
     dob: str
     password: str
     profile_pic: Optional[str] = Field(default_factory=str)
     company_name: str
     company_address: Address
-    country: str
     seller_name: str
     products_selling: list[BackLink["Product"]] = Field(
         json_schema_extra={"original_field": "seller"}, default_factory=list
@@ -108,6 +110,5 @@ class Reviews(Document):
 class OTP(Document):
     userID: str
     token: str
-    attempts: int = Field(default=0)
     lastUsed: datetime = Field(default=datetime.now())
-    isBlocked: bool = Field(default=False)
+    hasExpired: bool = Field(default=False)

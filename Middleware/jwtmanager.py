@@ -15,7 +15,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
 class JWTManager:
 
     @staticmethod
-    def generate_token(data: dict, expires_delta: Optional[timedelta] = None):
+    async def generate_token(data: dict, expires_delta: Optional[timedelta] = None):
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + timedelta(minutes=float(expires_delta))
@@ -30,7 +30,7 @@ class JWTManager:
         return encode_jwt
 
     @staticmethod
-    def verify_jwt(token: str):
+    async def verify_jwt(token: str):
         try:
             decode_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             current_timestamp = datetime.utcnow().timestamp()
@@ -42,3 +42,15 @@ class JWTManager:
         except ValueError as error:
             print(error)
             return False
+
+    @staticmethod
+    async def get_token_data(token: str) -> dict | None:
+        try:
+            decode_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            current_timestamp = datetime.utcnow().timestamp()
+            if decode_token["exp"] <= current_timestamp:
+                raise ValueError("Token expired!")
+            return decode_token
+        except ValueError as error:
+            print(error)
+            return None
