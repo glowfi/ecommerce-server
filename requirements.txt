@@ -202,6 +202,7 @@ pyzmq==26.0.3
 qtconsole==5.5.2
 QtPy==2.4.1
 rapidfuzz==3.9.0
+razorpay==0.2.0
 readme_renderer==43.0
 referencing==0.35.1
 Reflector==2023.6.28.0.36.1

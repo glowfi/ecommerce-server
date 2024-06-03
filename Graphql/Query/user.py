@@ -8,7 +8,7 @@ class Query:
     @strawberry.field
     async def get_all_categories() -> rgu:
         try:
-            allUsers = await User.find_many(fetch_links=True, limit=10).to_list()
+            allUsers = await User.find_many(fetch_links=True).to_list()
             return rgu(data=allUsers, err=None)
         except Exception as e:
             return rgu(data=None, err=str(e))
