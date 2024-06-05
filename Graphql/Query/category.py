@@ -10,6 +10,7 @@ class Query:
 
         try:
             allCategories = await Category.find_many(fetch_links=True).to_list()
+
             return rgca(data=allCategories, err=None)
         except Exception as e:
             return rgca(data=None, err=str(e))

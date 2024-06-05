@@ -20,6 +20,9 @@ class IsAuthenticated(BasePermission):
         request = info.context["request"]
         res = info.context["response"]
 
+        # Get redis object
+        redis = info.context["redis_client"]
+
         # Access headers authentication
         authentication = request.headers["authentication"]
         if authentication:
@@ -28,7 +31,9 @@ class IsAuthenticated(BasePermission):
             if isverified:
                 return True
             else:
-                refToken = request.cookies.get("refreshToken", None)
+                # refToken = request.cookies.get("refreshToken", None)
+                data = await JWTManager.get_token_data(token)
+                refToken = await redis.get(data["userID"])
                 if not refToken:
                     return False
                 else:

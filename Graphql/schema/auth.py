@@ -1,5 +1,7 @@
 import strawberry
 
+from Graphql.schema.user import Address
+
 
 @strawberry.input
 class InputLogin:
@@ -15,12 +17,20 @@ class Login:
     email: str
     profile_pic: str
     name: str
+    address: Address
     userType: str
+    phone_number: str
 
 
 @strawberry.type
 class LoginResponse:
     data: Login | None
+    err: str | None
+
+
+@strawberry.type
+class LogoutResponse:
+    data: str | None
     err: str | None
 
 

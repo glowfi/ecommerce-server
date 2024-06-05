@@ -29,6 +29,7 @@ class Seller:
             "city": fake.city(),
             "state": fake.state(),
             "country": fake.country(),
+            "countryCode": fake.country_code(),
             "zip_code": fake.zipcode(),
         }
         self.seller_name = f"{fake.first_name()} {fake.last_name()}"
@@ -68,6 +69,7 @@ for i in range(10):
             "city": fake.city(),
             "state": fake.state(),
             "country": fake.country(),
+            "countryCode": fake.country_code(),
             "zip_code": fake.zipcode(),
         },
         "profile_pic": random.choice(pics),

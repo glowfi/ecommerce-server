@@ -14,6 +14,7 @@ class Address:
     city: str
     state: str
     country: str
+    countryCode: str
     zip_code: str
 
 
@@ -22,6 +23,7 @@ class AddressInput:
     street_address: Optional[str] = strawberry.field(default_factory=str)
     city: Optional[str] = strawberry.field(default_factory=str)
     country: Optional[str] = strawberry.field(default_factory=str)
+    countryCode: Optional[str] = strawberry.field(default_factory=str)
     state: Optional[str] = strawberry.field(default_factory=str)
     zip_code: Optional[str] = strawberry.field(default_factory=str)
 
@@ -61,7 +63,7 @@ class InputUpdateUser:
     password: Optional[str] = strawberry.field(default_factory=str)
     dob: Optional[str] = strawberry.field(default_factory=str)
     phone_number: Optional[str] = strawberry.field(default_factory=str)
-    address: Optional[str] = strawberry.field(default_factory=str)
+    address: Optional[AddressInput] = strawberry.field(default_factory=str)
 
 
 @strawberry.type

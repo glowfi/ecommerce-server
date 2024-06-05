@@ -4,6 +4,7 @@ from dotenv import find_dotenv, load_dotenv
 from fastapi import FastAPI, Depends
 from config.connection import beanie_connection
 from Redis.connection import redis_connection
+from Kafka.connection import kafka_connection
 import strawberry
 from Graphql.mutation import Mutation
 from Graphql.query import Query
@@ -16,19 +17,20 @@ load_dotenv(find_dotenv(".env"))
 FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 # Redis Client string
-redis_client = {"client": None}
+clients = {"redis_client": None, "kafka_producer": None}
 
 
 # Custom ctx_getter
 def custom_context_dependency() -> dict:
-    return redis_client
+    return clients
 
 
 async def get_context(
     custom_value=Depends(custom_context_dependency),
 ):
     return {
-        "redis_client": custom_value["client"],
+        "redis_client": custom_value["redis_client"],
+        "kafka_producer": custom_value["kafka_producer"],
     }
 
 
@@ -38,13 +40,17 @@ async def lifespan(app: FastAPI):
     # Connect with beanie and redis
     await beanie_connection.connect()
     await redis_connection.connect()
-    redis_client["client"] = redis_connection.client
+    await kafka_connection.connect()
+
+    clients["redis_client"] = redis_connection.client
+    clients["kafka_producer"] = kafka_connection.producer
 
     yield
 
     # Close beanie and redis connection
     await beanie_connection.disconnect()
     await redis_connection.disconnect()
+    await kafka_connection.disconnect()
 
 
 # FastAPI app

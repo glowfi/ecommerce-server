@@ -1,4 +1,3 @@
-import random
 from typing import Optional
 from beanie import Document, Link, BackLink, Indexed
 from datetime import datetime
@@ -10,6 +9,7 @@ class Address(BaseModel):
     city: str
     state: str
     country: str
+    countryCode: str
     zip_code: str
 
 
@@ -32,10 +32,16 @@ class User(Document):
         json_schema_extra={"original_field": "user_reviewed"}, default_factory=list
     )
 
+    class Config:
+        from_attributes = True
+
 
 class Admin(Document):
     email: Indexed(str, unique=True)
     password: str
+
+    class Config:
+        from_attributes = True
 
 
 class Seller(Document):
@@ -52,6 +58,9 @@ class Seller(Document):
         json_schema_extra={"original_field": "seller"}, default_factory=list
     )
 
+    class Config:
+        from_attributes = True
+
 
 class Category(Document):
     name: str
@@ -59,6 +68,9 @@ class Category(Document):
     products_belonging: list[BackLink["Product"]] = Field(
         json_schema_extra={"original_field": "category"}, default_factory=list
     )
+
+    class Config:
+        from_attributes = True
 
 
 class Product(Document):
@@ -80,12 +92,15 @@ class Product(Document):
     wishedBy: list[BackLink["Wishlist"]] = Field(
         json_schema_extra={"original_field": "product_wished"}, default_factory=list
     )
-    orderedBy: list[BackLink["Orders"]] = Field(
-        json_schema_extra={"original_field": "product_ordered"}, default_factory=list
-    )
+    # orderedBy: list[BackLink["Orders"]] = Field(
+    #     json_schema_extra={"original_field": "products_ordered"}, default_factory=list
+    # )
     reviewedBy: list[BackLink["Reviews"]] = Field(
         json_schema_extra={"original_field": "product_reviewed"}, default_factory=list
     )
+
+    class Config:
+        from_attributes = True
 
 
 class Wishlist(Document):
@@ -93,11 +108,32 @@ class Wishlist(Document):
     product_wished: Link["Product"]
     wishedAt: datetime = Field(default=datetime.now())
 
+    class Config:
+        from_attributes = True
+
+
+class Razorpay(BaseModel):
+    razorpay_payment_id: Optional[str] = Field(default_factory=str)
+    razorpay_order_id: Optional[str] = Field(default_factory=str)
+    razorpay_signature: Optional[str] = Field(default_factory=str)
+
+
+class Product_Ordered(Product):
+    quantity: int
+
 
 class Orders(Document):
+    amount: float
+    isPending: bool = Field(default=True)
+    hasFailed: bool = Field(default=False)
+    payment_by: str = Field(default_factory=str)
+    razorpay_details: Razorpay = Field(default_factory=dict)
     user_ordered: Link["User"]
-    product_ordered: Link["Product"]
+    products_ordered: list[Product_Ordered]
     orderedAt: datetime = Field(default=datetime.now())
+
+    class Config:
+        from_attributes = True
 
 
 class Reviews(Document):
@@ -106,9 +142,15 @@ class Reviews(Document):
     product_reviewed: Link["Product"]
     orderedAt: datetime = Field(default=datetime.now())
 
+    class Config:
+        from_attributes = True
+
 
 class OTP(Document):
     userID: str
     token: str
     lastUsed: datetime = Field(default=datetime.now())
     hasExpired: bool = Field(default=False)
+
+    class Config:
+        from_attributes = True

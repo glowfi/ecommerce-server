@@ -1,59 +1,184 @@
+import os
 import strawberry
+import razorpay
 from models.dbschema import Orders, User, Product
 from Graphql.schema.orders import (
     ResponseOrders as ror,
     InputOrders as ipor,
-    # InputUpdateOrders as ipuor,
+    InputUpdateOrders as ipuor,
 )
-from helper.utils import encode_input
+from helper.utils import encode_input, generate_random_alphanumeric
+from dotenv import load_dotenv, find_dotenv
+from beanie.odm.operators.find.comparison import In
+
+
+# Load dotenv
+load_dotenv(find_dotenv(".env"))
+RAZER_KEY_ID = os.getenv("RAZER_KEY_ID")
+RAZER_KEY_SECRET = os.getenv("RAZER_KEY_SECRET")
+KAFKA_ORDER_TOPIC = os.getenv("KAFKA_ORDER_TOPIC")
+
+
+def stripper(data):
+    new_data = {}
+    for k, v in data.items():
+        if isinstance(v, dict):
+            v = stripper(v)
+        if v not in ("", None, {}):
+            new_data[k] = v
+    return new_data
+
+
+async def add_order_to_db(encoded_data, razor_order_id=""):
+    try:
+        # Find User
+        user = await User.get(encoded_data["userID"], fetch_links=True)
+        # print(user)
+
+        if user:
+            # Find Product references
+            products_ordered_ref = []
+            for pid in encoded_data["productsOrdered"]:
+                prod = await Product.get(pid[0])
+                if prod:
+                    products_ordered_ref.append(
+                        {**prod.__dict__, "quantity": int(pid[1])}
+                    )
+
+            if products_ordered_ref:
+
+                if encoded_data["payment_by"] == "razorpay":
+                    new_ord = Orders(
+                        **{
+                            "amount": encoded_data["amount"],
+                            "user_ordered": user,
+                            "products_ordered": products_ordered_ref,
+                            "razorpay_details": {"razorpay_order_id": razor_order_id},
+                            "payment_by": encoded_data["payment_by"],
+                        }
+                    )
+                else:
+                    new_ord = Orders(
+                        **{
+                            "amount": encoded_data["amount"],
+                            "user_ordered": user,
+                            "products_ordered": products_ordered_ref,
+                            "payment_by": encoded_data["payment_by"],
+                        }
+                    )
+
+                # Inset order
+                data = await new_ord.insert()
+                print("Order added to DB!")
+                return data.id
+            else:
+                print("No products ordered!")
+                return ""
+        else:
+            print(f"No such user found with id {encoded_data['userID']}")
+            return ""
+    except Exception as e:
+        print("Error adding order!", str(e))
+        return ""
+
+
+async def add_user_to_db(encoded_data, info):
+    try:
+        # Find User
+        user = await User.get(encoded_data["userID"], fetch_links=True)
+        # print(user)
+
+        if user:
+            # Upadate User
+            new_user = stripper(encoded_data["userDetails"])
+
+            new_user_address = new_user["address"]
+
+            if new_user["address"]["street_address"]:
+                user.address.street_address = new_user["address"]["street_address"]
+
+            if new_user["address"]["city"]:
+                user.address.city = new_user["address"]["city"]
+
+            if new_user["address"]["state"]:
+                user.address.state = new_user["address"]["state"]
+
+            if new_user["address"]["country"]:
+                user.address.country = new_user["address"]["country"]
+
+            if new_user["address"]["countryCode"]:
+                user.address.countryCode = new_user["address"]["countryCode"]
+
+            if new_user["address"]["zip_code"]:
+                user.address.zip_code = new_user["address"]["zip_code"]
+
+            await user.save()
+            print("User added to DB!")
+
+            # Publish message to apache kafka topic name order_details
+            producer = info.context["kafka_producer"]
+            await producer.send(KAFKA_ORDER_TOPIC, "Test!".encode("utf-8"))
+        else:
+            print(f"No user found with id {encoded_data['userID']}!")
+    except Exception as e:
+        print("Error adding order!", str(e))
 
 
 @strawberry.type
 class Mutation:
 
     @strawberry.mutation
-    async def create_order(self, data: ipor) -> ror:
+    async def create_order(self, data: ipor, info: strawberry.Info) -> list[str]:
         try:
+            # Clean data
             encoded_data = encode_input(data.__dict__)
-            # Find User
-            user = await User.get(encoded_data["userID"], fetch_links=True)
-            if user:
-                # Find product
-                prod = await Product.get(encoded_data["productID"], fetch_links=True)
-                if prod:
-                    new_ord = Orders(
-                        **{
-                            "user_ordered": user,
-                            "product_ordered": prod,
-                        }
-                    )
-                    ord_ins = await new_ord.insert()
-                    return ror(data=ord_ins, err=None)
-                else:
-                    return ror(
-                        data=None,
-                        err=f"No product found with id {encoded_data['productID']}",
-                    )
-            else:
-                return ror(
-                    data=None, err=f"No user found with id {encoded_data['userID']}"
+
+            print(encoded_data, "DATA")
+            # Note : User will be authenticated anyway so no checks and no checks on product exists
+
+            if encoded_data["payment_by"] == "razorpay":
+                # Just create a razorpay order and send it
+                client = razorpay.Client(auth=(RAZER_KEY_ID, RAZER_KEY_SECRET))
+                razor_data = {
+                    "amount": (round(encoded_data["amount"] * 0.08) * 100) + 300,
+                    "currency": "INR",
+                    "receipt": f"order_rcptid_{generate_random_alphanumeric(15)}",
+                }
+                create_order = client.order.create(data=razor_data)
+                razor_order_id = create_order["id"]
+
+                data = await add_order_to_db(encoded_data, razor_order_id)
+
+                # Background task data base insertion of user details
+                info.context["background_tasks"].add_task(
+                    add_user_to_db, encoded_data, info
                 )
+                return [razor_order_id, data]
+            else:
+                # Background task data base insertion of orders
+                info.context["background_tasks"].add_task(
+                    add_order_to_db, encoded_data, "", info
+                )
+                return ["Order Placed! Waiting for confirmation"]
 
         except Exception as e:
-            return ror(data=None, err=str(e))
+            return [f"Error Occured {str(e)}"]
 
-    # @strawberry.mutation
-    # async def update_order(self, data: ipuor, orderID: str) -> ror:
-    #     try:
-    #         encoded_data = encode_input(data.__dict__)
-    #         get_ord = await Orders.get(orderID)
-    #         if get_ord:
-    #             ord_updated = await get_ord.update({"$set": encoded_data})
-    #             return ror(data=ord_updated, err=None)
-    #         else:
-    #             return ror(data=None, err=f"No order with orderID {orderID}")
-    #     except Exception as e:
-    #         return ror(data=None, err=str(e))
+    @strawberry.mutation
+    async def update_order(self, data: ipuor) -> ror:
+        try:
+            encoded_data = encode_input(data.__dict__)
+            get_ord = await Orders.get(encoded_data["orderID"])
+            if get_ord:
+                ord_updated = await get_ord.update({"$set": encoded_data})
+                print("Order Updated!")
+                return ror(data=ord_updated, err=None)
+            else:
+                return ror(
+                    data=None, err=f"No order with orderID {encoded_data["orderID"]}"
+                )
+        except Exception as e:
+            return ror(data=None, err=str(e))
 
     @strawberry.mutation
     async def delete_order(self, orderID: str) -> ror:

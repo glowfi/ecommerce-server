@@ -2,6 +2,8 @@ from fastapi.encoders import jsonable_encoder
 from email_validator import validate_email, EmailNotValidError
 from models.dbschema import Admin, Seller, User
 import random
+import string
+
 
 # Encode Inputs
 
@@ -10,13 +12,18 @@ def encode_input(data) -> dict:
     data = jsonable_encoder(data)
     tmp = {}
     for k, v in data.items():
-        if v:
+        if v not in ("", {}, []):
             tmp[k] = v
     return tmp
 
 
 def generate_random_number(length):
     return int("".join([str(random.randint(0, 10)) for _ in range(length)]))
+
+
+def generate_random_alphanumeric(length):
+    lst = [random.choice(string.ascii_letters + string.digits) for _ in range(length)]
+    return "".join(lst)
 
 
 # Helper function checkUserExists
