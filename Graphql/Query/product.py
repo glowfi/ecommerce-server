@@ -42,7 +42,7 @@ class Query:
                     in currProduct["seller"].__dict__["seller_name"].lower()
                 ):
                     final.append(product)
-            return rgpr(data=final, err=None)
+            return rgpr(data=final[: min(6, len(final))], err=None)
         except Exception as e:
             return rgpr(data=None, err=str(e))
 
