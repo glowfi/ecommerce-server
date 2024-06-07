@@ -143,6 +143,7 @@ class Reviews(Document):
     orderedAt: datetime = Field(default=datetime.now())
     userId: str
     productId: str
+    reviewedAt: datetime = Field(default=datetime.now())
 
     class Config:
         from_attributes = True
