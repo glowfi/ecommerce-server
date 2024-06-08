@@ -9,7 +9,7 @@ class Query:
     async def get_all_categories(self, info: strawberry.Info) -> rgca:
 
         try:
-            allCategories = await Category.find_many(fetch_links=True).to_list()
+            allCategories = await Category.find_many().to_list()
 
             return rgca(data=allCategories, err=None)
         except Exception as e:

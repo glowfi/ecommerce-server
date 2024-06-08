@@ -32,6 +32,7 @@ class Mutation:
                     new_prod = Product(
                         brand=prod["brand"],
                         category=cat,
+                        categoryName=cat.name,
                         coverImage=prod["coverImage"],
                         date_created=prod["date_created"],
                         date_created_human=prod["date_created_human"],
@@ -42,6 +43,7 @@ class Mutation:
                         price_inr=prod["price_inr"],
                         rating=prod["rating"],
                         seller=seller,
+                        sellerName=seller.seller_name,
                         stock=prod["stock"],
                         title=prod["title"],
                     )
@@ -60,6 +62,8 @@ class Mutation:
                 if cat:
                     encode_data["category"] = cat
                     encode_data["seller"] = seller
+                    encode_data["categoryName"] = cat.name
+                    encode_data["sellerName"] = seller.seller_name
 
                     new_prod = Product(**encode_data)
                     prod_ins = await new_prod.insert()

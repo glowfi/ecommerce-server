@@ -1,5 +1,5 @@
 import strawberry
-from typing import TYPE_CHECKING, Annotated, Optional
+from typing import TYPE_CHECKING, Annotated, Optional, Union
 
 if TYPE_CHECKING:
     from .seller import Seller
@@ -13,7 +13,8 @@ if TYPE_CHECKING:
 class Product:
     id: str
     brand: str
-    category: Annotated["Category", strawberry.lazy(".category")]
+    category: Union[Annotated["Category", strawberry.lazy(".category")], None]
+    categoryName: str
     coverImage: list[str]
     date_created: int
     date_created_human: str
@@ -24,12 +25,19 @@ class Product:
     price: float
     price_inr: float
     rating: int
-    seller: Annotated["Seller", strawberry.lazy(".seller")]
+    seller: Union[Annotated["Seller", strawberry.lazy(".seller")], None]
+    sellerName: str
     stock: int
     title: str
-    wishedBy: list[Annotated["Wishlist", strawberry.lazy(".wishlist")]]
-    orderedBy: list[Annotated["Orders", strawberry.lazy(".orders")]]
-    reviewedBy: list[Annotated["Reviews", strawberry.lazy(".reviews")]]
+    wishedBy: Optional[list[Annotated["Wishlist", strawberry.lazy(".wishlist")]]] = (
+        strawberry.field(default_factory=list)
+    )
+    orderedBy: Optional[list[Annotated["Orders", strawberry.lazy(".orders")]]] = (
+        strawberry.field(default_factory=list)
+    )
+    reviewedBy: Optional[list[Annotated["Reviews", strawberry.lazy(".reviews")]]] = (
+        strawberry.field(default_factory=list)
+    )
 
 
 @strawberry.input

@@ -76,6 +76,7 @@ class Category(Document):
 class Product(Document):
     brand: str
     category: Link[Category]
+    categoryName: str
     coverImage: list[str]
     date_created: int
     date_created_human: str
@@ -87,6 +88,7 @@ class Product(Document):
     price_inr: float
     rating: int
     seller: Link[Seller]
+    sellerName: str
     stock: int
     title: str
     wishedBy: list[BackLink["Wishlist"]] = Field(
