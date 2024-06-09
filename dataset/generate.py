@@ -7,6 +7,7 @@ import random
 import string
 import os
 from dotenv import find_dotenv, load_dotenv
+import uuid
 
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
@@ -94,12 +95,45 @@ def get_name(nameType, quantity):
     return names
 
 
-def get_email(quantity):
+def generate_email(full_name):
+    # List of famous email providers
+    domains = [
+        "gmail.com",
+        "yahoo.com",
+        "hotmail.com",
+        "outlook.com",
+        "aol.com",
+        "protonmail.com",
+    ]
+
+    # Extracting first and last names
+    first_name, last_name = full_name.split(" ")
+
+    # Generating a unique identifier
+    unique_id = str(uuid.uuid4())[:8]  # Using only the first 8 characters of the UUID
+
+    # Creating the email name
+    email_name = f"{first_name.lower()}.{last_name.lower()}_{unique_id}"
+
+    # Ensuring the email name is 10 characters long
+    # email_name = email_name[:10]
+
+    # Appending a domain
+    email_address = f"{email_name}@{random.choice(domains)}"
+
+    return email_address
+
+
+def get_email(quantity, name: str | list):
     res = []
-    for i in range(quantity):
-        email = fake.email(safe=True)
-        res.append(email)
-    return res
+
+    if isinstance(name, list):
+        for i in range(quantity):
+            email = generate_email(name[i])
+            res.append(email)
+        return res
+    else:
+        return generate_email(name)
 
 
 def get_password(quantity):
@@ -177,11 +211,9 @@ for i in range(1, 5):
 
 
 def get_all():
-    names, emails, passwords = (
-        get_name("fullname", TOTAL_RECORDS),
-        get_email(TOTAL_RECORDS),
-        get_password(TOTAL_RECORDS),
-    )
+    names = get_name("fullname", TOTAL_RECORDS)
+    emails = get_email(TOTAL_RECORDS, names)
+    passwords = get_password(TOTAL_RECORDS)
 
     dobs = get_dob(TOTAL_RECORDS)
     addresses = get_address(TOTAL_RECORDS)
@@ -227,7 +259,6 @@ get_all()
 
 class Seller:
     def __init__(self):
-        self.email = fake.email(safe=True)
         self.dob = (
             datetime.datetime.now()
             - datetime.timedelta(days=random.randint(365 * 20, 365 * 80))
@@ -249,7 +280,7 @@ for prod in data:
 
     seller = Seller()
     prod["seller_info"] = {
-        "email": seller.email,
+        "email": get_email(1, seller.seller_name),
         "phone_number": get_phone_numbers(saved_code, 1)[0],
         "dob": seller.dob,
         "password": seller.password,
