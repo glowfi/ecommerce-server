@@ -2,7 +2,7 @@ import strawberry
 from datetime import datetime
 from typing import TYPE_CHECKING, Annotated, Optional
 
-from Graphql.schema.user import AddressInput, InputUpdateUser
+from Graphql.schema.user import Address, AddressInput, InputUpdateUser
 
 if TYPE_CHECKING:
     from .product import Product
@@ -25,8 +25,13 @@ class Orders:
     payment_by: str
     razorpay_details: Razorpay
     user_ordered: Annotated["User", strawberry.lazy(".user")]
-    product_ordered: Annotated["Product", strawberry.lazy(".product")]
+    products_ordered: list[Annotated["Product", strawberry.lazy(".product")]]
     orderedAt: datetime
+    address: Address
+    name: str
+    email: str
+    phone_number: str
+    update_address: bool
 
 
 @strawberry.input
@@ -42,6 +47,11 @@ class InputOrders:
     userID: str
     productsOrdered: list[list[str]]
     payment_by: str
+    address: AddressInput
+    name: str
+    email: str
+    phone_number: str
+    update_address: bool
 
 
 @strawberry.input

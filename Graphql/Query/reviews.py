@@ -29,16 +29,22 @@ class Query:
             return rgrev(data=None, err=str(e))
 
     @strawberry.field
-    async def get_all_reviews_by_user_id(self, userID: str) -> rgrev:
+    async def get_all_reviews_by_user_id(
+        self, userID: str, skipping: int, limit: int
+    ) -> rgrev:
         try:
+            print(userID, skipping, limit)
             getProd = await User.get(userID)
             if getProd:
                 getReviews = await Reviews.find_many(
-                    Reviews.userId == userID, fetch_links=True
+                    Reviews.userId == userID,
+                    fetch_links=True,
+                    skip=skipping,
+                    limit=limit,
                 ).to_list()
                 return rgrev(data=getReviews, err=None)
             else:
-                return rgrev(data=None, err=f"No Proudct with {userID} exists!")
+                return rgrev(data=None, err=f"No User with {userID} exists!")
 
         except Exception as e:
             return rgrev(data=None, err=str(e))

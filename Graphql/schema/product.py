@@ -29,6 +29,7 @@ class Product:
     sellerName: str
     stock: int
     title: str
+    quantity: Union[int, None]
     wishedBy: Optional[list[Annotated["Wishlist", strawberry.lazy(".wishlist")]]] = (
         strawberry.field(default_factory=list)
     )

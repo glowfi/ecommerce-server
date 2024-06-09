@@ -131,8 +131,14 @@ class Orders(Document):
     payment_by: str = Field(default_factory=str)
     razorpay_details: Razorpay = Field(default_factory=dict)
     user_ordered: Link["User"]
+    userid: str
     products_ordered: list[Product_Ordered]
     orderedAt: datetime = Field(default=datetime.now())
+    address: Address
+    name: str
+    email: str
+    phone_number: str
+    update_address: bool
 
     class Config:
         from_attributes = True

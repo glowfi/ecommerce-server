@@ -45,25 +45,41 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
                         {**prod.__dict__, "quantity": int(pid[1])}
                     )
 
+            print(products_ordered_ref)
+
             if products_ordered_ref:
 
                 if encoded_data["payment_by"] == "razorpay":
+                    print("razorpay")
                     new_ord = Orders(
                         **{
                             "amount": encoded_data["amount"],
                             "user_ordered": user,
+                            "userid": str(user.id),
                             "products_ordered": products_ordered_ref,
                             "razorpay_details": {"razorpay_order_id": razor_order_id},
                             "payment_by": encoded_data["payment_by"],
+                            "name": encoded_data["name"],
+                            "email": encoded_data["email"],
+                            "phone_number": encoded_data["phone_number"],
+                            "address": encoded_data["address"],
+                            "update_address": encoded_data["update_address"],
                         }
                     )
                 else:
+                    print("COD")
                     new_ord = Orders(
                         **{
                             "amount": encoded_data["amount"],
                             "user_ordered": user,
+                            "userid": str(user.id),
                             "products_ordered": products_ordered_ref,
                             "payment_by": encoded_data["payment_by"],
+                            "name": encoded_data["name"],
+                            "email": encoded_data["email"],
+                            "phone_number": encoded_data["phone_number"],
+                            "address": encoded_data["address"],
+                            "update_address": encoded_data["update_address"],
                         }
                     )
 
@@ -149,17 +165,25 @@ class Mutation:
 
                 data = await add_order_to_db(encoded_data, razor_order_id)
 
-                # Background task data base insertion of user details
-                info.context["background_tasks"].add_task(
-                    add_user_to_db, encoded_data, info
-                )
+                if encoded_data["update_address"]:
+                    # Background task data base insertion of user details
+                    info.context["background_tasks"].add_task(
+                        add_user_to_db, encoded_data, info
+                    )
+                else:
+                    print("Not updating address")
                 return [razor_order_id, data]
             else:
-                # Background task data base insertion of orders
-                info.context["background_tasks"].add_task(
-                    add_order_to_db, encoded_data, "", info
-                )
-                return ["Order Placed! Waiting for confirmation"]
+                data = await add_order_to_db(encoded_data, "")
+
+                if encoded_data["update_address"]:
+                    # Background task data base insertion of user details
+                    info.context["background_tasks"].add_task(
+                        add_user_to_db, encoded_data, info
+                    )
+                else:
+                    print("Not updating address")
+                return ["Order Placed! Cash on delivery mode"]
 
         except Exception as e:
             return [f"Error Occured {str(e)}"]
