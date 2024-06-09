@@ -1,9 +1,21 @@
 import strawberry
-from Graphql.schema.product import ResponseGetallProduct as rgpr
+from Graphql.schema.product import (
+    ResponseGetallProduct as rgpr,
+    SearchResponse,
+    SearchResponseResult,
+)
 from models.dbschema import Product
 from Graphql.schema.product import (
     ResponseProduct as rpr,
 )
+from dotenv import load_dotenv, find_dotenv
+import os
+
+# Load dotenv
+load_dotenv(find_dotenv(".env"))
+
+TOP_RESULTS = int(os.getenv("TOP_RESULTS_SEARCH"))
+USER_SEARCH_INDEX_NAME = os.getenv("USER_SEARCH_INDEX_NAME")
 
 
 @strawberry.type
@@ -23,6 +35,58 @@ class Query:
             return rgpr(data=allProducts, err=None)
         except Exception as e:
             return rgpr(data=None, err=str(e))
+
+    @strawberry.field
+    async def get_products_by_search_term_atlas_search(
+        self, term: str
+    ) -> SearchResponseResult:
+        data = await Product.aggregate(
+            aggregation_pipeline=[
+                {
+                    "$search": {
+                        "index": USER_SEARCH_INDEX_NAME,
+                        "text": {
+                            "query": term,
+                            "path": [
+                                "brand",
+                                "description",
+                                "categoryName",
+                                "sellerName",
+                                "title",
+                            ],
+                            "fuzzy": {},
+                        },
+                    },
+                },
+                {"$limit": TOP_RESULTS},
+                {"$sort": {"score": 1}},
+                {
+                    "$project": {
+                        "_id": 1,
+                        "score": {"$meta": "searchScore"},
+                        "sellerName": 1,
+                        "brand": 1,
+                        "description": 1,
+                        "categoryName": 1,
+                        "coverImage": 1,
+                        "title": 1,
+                        "price": 1,
+                    },
+                },
+            ]
+        ).to_list()
+
+        final_data = []
+
+        for dic in data:
+            tmp = {}
+            for i in dic:
+                tmp = {**dic}
+                tmp["id"] = str(tmp["_id"])[:]
+                del tmp["_id"]
+            final_data.append(SearchResponse(**tmp))
+
+        return SearchResponseResult(data=final_data)
 
     @strawberry.field
     async def get_products_by_search_term(self, term: str) -> rgpr:

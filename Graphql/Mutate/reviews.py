@@ -9,6 +9,12 @@ from Graphql.schema.reviews import (
 from helper.utils import encode_input
 import requests
 import random
+import os
+from dotenv import find_dotenv, load_dotenv
+
+# Load dotenv
+load_dotenv(find_dotenv(".env"))
+RANDOMMER_KEY = os.getenv("RANDOMMER_KEY")
 
 
 @strawberry.type
@@ -18,7 +24,6 @@ class Mutation:
     async def generate_review(self) -> str:
         try:
 
-            key = "7f0636b70f53464f8eb8ca81c74a8e9e"
             allUsers = await User.find_many(fetch_links=True).to_list()
             allProducts = await Product.find_many(fetch_links=True).to_list()
 
@@ -31,7 +36,7 @@ class Mutation:
 
                 data = requests.post(
                     f"https://randommer.io/api/Text/Review?quantity={quantity}&product={productName}",
-                    headers={"X-Api-Key": key},
+                    headers={"X-Api-Key": RANDOMMER_KEY},
                 ).json()
 
                 for review in data:

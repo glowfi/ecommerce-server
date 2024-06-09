@@ -87,3 +87,21 @@ class ResponseProduct:
 class ResponseGetallProduct:
     data: list[Product] | None
     err: str | None
+
+
+@strawberry.type
+class SearchResponse:
+    brand: str
+    categoryName: str
+    description: str
+    id: str
+    price: float
+    score: float
+    sellerName: str
+    title: str
+    coverImage: list[str]
+
+
+@strawberry.type
+class SearchResponseResult:
+    data: list[SearchResponse]

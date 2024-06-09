@@ -39,6 +39,7 @@ async def get_context(
 async def lifespan(app: FastAPI):
     # Connect with beanie and redis
     await beanie_connection.connect()
+    await beanie_connection.upsertSearchIndex()
     await redis_connection.connect()
     await kafka_connection.connect()
 
@@ -87,5 +88,5 @@ app.include_router(graphql_app, prefix="/graphql")
 
 
 # Start uvicorn server
-# if __name__ == "__main__":
-#     uvicorn.run("main:app", host="localhost", port=5000, reload=True)
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="localhost", port=5000, reload=True)
