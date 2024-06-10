@@ -8,6 +8,8 @@ import string
 import os
 from dotenv import find_dotenv, load_dotenv
 import uuid
+from genderize import Genderize
+
 
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
@@ -201,6 +203,15 @@ def get_address(number):
     return res
 
 
+def get_profile_pic_link(name):
+    idx = random.randint(1, 78)
+    gender = Genderize().get([name])[0]["gender"]
+    if gender == "male":
+        return f"https://xsgames.co/randomusers/assets/avatars/male/{idx}.jpg"
+    elif gender == "female":
+        return f"https://xsgames.co/randomusers/assets/avatars/female/{idx}.jpg"
+
+
 TOTAL_RECORDS = 10
 records = []
 
@@ -243,7 +254,7 @@ def get_all():
             "dob": dob,
             "phone_number": get_phone_numbers(saved_code, 1)[0],
             "address": addr,
-            "profile_pic": random.choice(pics),
+            "profile_pic": get_profile_pic_link(name),
         }
         final.append(tmp)
 
@@ -287,7 +298,7 @@ for prod in data:
         "company_name": seller.company_name,
         "company_address": get_addr,
         "seller_name": seller.seller_name,
-        "profile_pic": random.choice(pics),
+        "profile_pic": get_profile_pic_link(seller.seller_name),
     }
 
 

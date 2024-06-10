@@ -15,7 +15,9 @@ class RedisConnection:
     async def connect(self):
         pool = redis.ConnectionPool.from_url(str(self.REDIS_URL))
         self.client = redis.Redis.from_pool(pool)
-        print("Redis Connected!", self.REDIS_URL)
+
+        # print("Redis Connected!", self.REDIS_URL)
+        print("Redis Connected!", "Upstash")
 
     async def disconnect(self):
         await self.client.close()
