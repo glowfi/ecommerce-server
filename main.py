@@ -39,7 +39,7 @@ async def get_context(
 async def lifespan(app: FastAPI):
     # Connect with beanie and redis
     await beanie_connection.connect()
-    # await beanie_connection.upsertSearchIndex()
+    await beanie_connection.upsertSearchIndex()
     await redis_connection.connect()
     await kafka_connection.connect()
 
