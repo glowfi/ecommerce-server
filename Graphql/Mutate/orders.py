@@ -45,7 +45,7 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
                         {**prod.__dict__, "quantity": int(pid[1])}
                     )
 
-            print(products_ordered_ref)
+            # print(products_ordered_ref)
 
             if products_ordered_ref:
 

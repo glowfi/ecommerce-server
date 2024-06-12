@@ -18,12 +18,15 @@ class Query:
         self, userID: str, skipping: int, limit: int
     ) -> rgor:
         try:
-            allOrders = await Orders.find_many(
-                Orders.userid == userID,
-                fetch_links=True,
-                skip=skipping,
-                limit=limit,
-            ).to_list()
+
+            allOrders = (
+                await Orders.find(Orders.userid == userID, fetch_links=True)
+                .sort(-Orders.id)
+                .skip(skipping)
+                .limit(limit)
+                .to_list()
+            )
+
             return rgor(data=allOrders, err=None)
         except Exception as e:
             return rgor(data=None, err=str(e))

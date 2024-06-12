@@ -1,6 +1,7 @@
 import strawberry
-from Graphql.schema.reviews import ResponseGetallReviews as rgrev
+from Graphql.schema.reviews import ResponseGetallReviews as rgrev, Reviews as rv
 from models.dbschema import Product, Reviews, User
+import pymongo
 
 
 @strawberry.type
@@ -36,13 +37,42 @@ class Query:
             print(userID, skipping, limit)
             getProd = await User.get(userID)
             if getProd:
-                getReviews = await Reviews.find_many(
-                    Reviews.userId == userID,
-                    fetch_links=True,
-                    skip=skipping,
-                    limit=limit,
-                ).to_list()
-                return rgrev(data=getReviews, err=None)
+                data = (
+                    await Reviews.find(Reviews.userId == userID, fetch_links=True)
+                    .sort(-Reviews.id)
+                    .skip(skipping)
+                    .limit(limit)
+                    .to_list()
+                )
+
+                #     getReviews = await Reviews.aggregate(
+                #         aggregation_pipeline=[
+                #             {"$match": {"userId": userID}},
+                #             {"$sort": {"reviewedAt": -1}},
+                #             {"$skip": skipping},
+                #             {"$limit": limit},
+                #         ]
+                #     ).to_list()
+
+                #     data = []
+
+                #     for dic in getReviews:
+                #         tmp = {}
+                #         tmp = {**dic}
+                #         tmp["id"] = str(tmp["_id"])[:]
+
+                #         product = await Product.get(tmp["productId"])
+                #         user = await User.get(tmp["userId"])
+
+                #         tmp["user_reviewed"] = user
+                #         tmp["product_reviewed"] = product
+
+                #         del tmp["_id"]
+                #         del tmp["orderedAt"]
+
+                #         data.append(rv(**tmp))
+
+                return rgrev(data=data, err=None)
             else:
                 return rgrev(data=None, err=f"No User with {userID} exists!")
 
@@ -59,13 +89,14 @@ class Query:
                 fetch_links=True,
                 skip=skipping,
                 limit=limit,
+                sort=-Reviews.id,
             ).to_list()
 
-            ans = []
+            # ans = []
 
-            for review in getReviews:
-                ans.append(review)
+            # for review in getReviews:
+            #     ans.append(review)
 
-            return rgrev(data=ans, err=None)
+            return rgrev(data=getReviews, err=None)
         except Exception as e:
             return rgrev(data=None, err=str(e))

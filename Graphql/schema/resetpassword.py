@@ -1,3 +1,4 @@
+from typing import Union
 import strawberry
 
 
@@ -5,6 +6,7 @@ import strawberry
 class InputresetPassword:
     password: str
     token: str
+    userid: Union[str, None]
 
 
 @strawberry.type

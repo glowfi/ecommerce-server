@@ -1,3 +1,4 @@
+from pydantic import BaseModel, ConfigDict
 import strawberry
 from datetime import datetime
 from typing import TYPE_CHECKING, Annotated, Optional
@@ -13,6 +14,8 @@ class Reviews:
     comment: str
     user_reviewed: Annotated["User", strawberry.lazy(".user")]
     product_reviewed: Annotated["Product", strawberry.lazy(".product")]
+    productId: str
+    userId: str
     reviewedAt: datetime
 
 

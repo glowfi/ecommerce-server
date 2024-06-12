@@ -87,6 +87,6 @@ graphql_app = GraphQLRouter(
 app.include_router(graphql_app, prefix="/graphql")
 
 
-# Start uvicorn server
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="localhost", port=5000, reload=True)
+# # Start uvicorn server
+# if __name__ == "__main__":
+#     uvicorn.run("main:app", host="localhost", port=5000, reload=True)

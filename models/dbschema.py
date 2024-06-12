@@ -148,7 +148,6 @@ class Reviews(Document):
     comment: str
     user_reviewed: Link["User"]
     product_reviewed: Link["Product"]
-    orderedAt: datetime = Field(default=datetime.now())
     userId: str
     productId: str
     reviewedAt: datetime = Field(default=datetime.now())

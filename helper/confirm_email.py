@@ -483,9 +483,7 @@ html_content_confirm_email = """
                                 <a
                                     href="https://example.com"
                                     class="f-fallback email-masthead_name"
-                                >
-                                    [Product Name]
-                                </a>
+                                > [Product Name] </a>
                             </td>
                         </tr>
                         <!-- Email Body -->
@@ -510,8 +508,7 @@ html_content_confirm_email = """
                                             <div class="f-fallback">
                                                 <h1>Welcome, {{name}}!</h1>
                                                 <p>
-                                                    Thanks for trying [Product
-                                                    Name]. We’re thrilled to
+                                                    Thanks for trying [Product Name]. We’re thrilled to
                                                     have you on board. To get
                                                     the most out of [Product Name], do this primary next
                                                     step of confirming your
@@ -567,7 +564,7 @@ html_content_confirm_email = """
                                                     during business hours.
                                                 </p>
                                                 <p>
-                                                    Thanks, <br />[Product Name]
+                                                    Thanks, <br /> [Product Name]
                                                     team
                                                 </p>
                                                 <!-- Sub copy -->
