@@ -212,7 +212,7 @@ def get_profile_pic_link(name):
         return f"https://xsgames.co/randomusers/assets/avatars/female/{idx}.jpg"
 
 
-TOTAL_RECORDS = 10
+TOTAL_RECORDS = 100
 records = []
 
 pics = []

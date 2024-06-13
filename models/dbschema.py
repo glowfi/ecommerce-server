@@ -85,8 +85,6 @@ class Product(Document):
     images: list[list[str]]
     on_sale: bool = Field(default=False)
     price: float
-    price_inr: float
-    rating: int
     seller: Link[Seller]
     sellerName: str
     stock: int
@@ -139,6 +137,8 @@ class Orders(Document):
     email: str
     phone_number: str
     update_address: bool
+    shipping_fee: float
+    tax: float
 
     class Config:
         from_attributes = True
@@ -148,6 +148,7 @@ class Reviews(Document):
     comment: str
     user_reviewed: Link["User"]
     product_reviewed: Link["Product"]
+    rating: int
     userId: str
     productId: str
     reviewedAt: datetime = Field(default=datetime.now())

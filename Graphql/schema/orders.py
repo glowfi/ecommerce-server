@@ -2,7 +2,7 @@ import strawberry
 from datetime import datetime
 from typing import TYPE_CHECKING, Annotated, Optional
 
-from Graphql.schema.user import Address, AddressInput, InputUpdateUser
+from Graphql.schema.user import Address, AddressInput
 
 if TYPE_CHECKING:
     from .product import Product
@@ -32,6 +32,9 @@ class Orders:
     email: str
     phone_number: str
     update_address: bool
+    shipping_fee: float
+    tax: float
+    userid: str
 
 
 @strawberry.input
@@ -52,6 +55,8 @@ class InputOrders:
     email: str
     phone_number: str
     update_address: bool
+    shipping_fee: float
+    tax: float
 
 
 @strawberry.input

@@ -40,8 +40,6 @@ class Mutation:
                         discount_percent=prod["discount_percent"],
                         images=prod["images"],
                         price=prod["price"],
-                        price_inr=prod["price_inr"],
-                        rating=prod["rating"],
                         seller=seller,
                         sellerName=seller.seller_name,
                         stock=prod["stock"],

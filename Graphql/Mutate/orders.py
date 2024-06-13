@@ -64,6 +64,8 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
                             "phone_number": encoded_data["phone_number"],
                             "address": encoded_data["address"],
                             "update_address": encoded_data["update_address"],
+                            "shipping_fee": encoded_data["shipping_fee"],
+                            "tax": encoded_data["tax"],
                         }
                     )
                 else:
@@ -80,6 +82,8 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
                             "phone_number": encoded_data["phone_number"],
                             "address": encoded_data["address"],
                             "update_address": encoded_data["update_address"],
+                            "shipping_fee": encoded_data["shipping_fee"],
+                            "tax": encoded_data["tax"],
                         }
                     )
 
@@ -193,6 +197,7 @@ class Mutation:
         try:
             encoded_data = encode_input(data.__dict__)
             get_ord = await Orders.get(encoded_data["orderID"])
+            del encoded_data["orderID"]
             if get_ord:
                 ord_updated = await get_ord.update({"$set": encoded_data})
                 print("Order Updated!")

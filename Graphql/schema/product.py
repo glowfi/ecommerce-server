@@ -23,8 +23,6 @@ class Product:
     images: list[list[str]]
     on_sale: bool
     price: float
-    price_inr: float
-    rating: int
     seller: Union[Annotated["Seller", strawberry.lazy(".seller")], None]
     sellerName: str
     stock: int
@@ -53,8 +51,6 @@ class InputProduct:
     images: list[list[str]]
     on_sale: bool
     price: float
-    price_inr: float
-    rating: int
     sellerID: str
     stock: int
     title: str
@@ -71,8 +67,6 @@ class InputUpdateProduct:
     images: Optional[list[list[str]]] = strawberry.field(default_factory=list)
     on_sale: Optional[bool] = strawberry.field(default_factory=bool)
     price: Optional[float] = strawberry.field(default_factory=float)
-    price_inr: Optional[float] = strawberry.field(default_factory=float)
-    rating: Optional[int] = strawberry.field(default_factory=int)
     stock: Optional[int] = strawberry.field(default_factory=int)
     title: Optional[str] = strawberry.field(default_factory=str)
 

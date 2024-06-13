@@ -1,6 +1,6 @@
 import strawberry
-from Graphql.schema.orders import ResponseGetallOrders as rgor
-from models.dbschema import Orders
+from Graphql.schema.orders import ResponseGetallOrders as rgor, Orders as orde
+from models.dbschema import Orders, User
 
 
 @strawberry.type
@@ -19,6 +19,41 @@ class Query:
     ) -> rgor:
         try:
 
+            # getUser = await User.get(userID)
+
+            # # print(getUser, "User")
+
+            # getOrders = await Orders.aggregate(
+            #     aggregation_pipeline=[
+            #         {"$match": {"userid": userID}},
+            #         {"$sort": {"_id": -1}},
+            #         {"$skip": skipping},
+            #         {"$limit": limit},
+            #     ]
+            # ).to_list()
+
+            # # print(getOrders)
+
+            # data = []
+
+            # for dic in getOrders:
+            #     tmp = {}
+            #     tmp = {**dic}
+            #     tmp["id"] = str(tmp["_id"])[:]
+
+            #     tmp["user_ordered"] = getUser
+
+            #     tmp1 = {}
+            #     for key, val in tmp["address"].items():
+            #         tmp1[key] = val
+
+            #     tmp["address"] = tmp1
+
+            #     del tmp["_id"]
+            #     data.append(orde(**tmp))
+
+            # print(data[0].address.keys(), type(data[0].address))
+
             allOrders = (
                 await Orders.find(Orders.userid == userID, fetch_links=True)
                 .sort(-Orders.id)
@@ -28,5 +63,6 @@ class Query:
             )
 
             return rgor(data=allOrders, err=None)
+            # return rgor(data=data, err=None)
         except Exception as e:
             return rgor(data=None, err=str(e))

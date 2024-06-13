@@ -32,7 +32,7 @@ class Mutation:
 
             for product in allProducts:
                 productName = product.title
-                quantity = 10
+                quantity = 30
 
                 data = requests.post(
                     f"https://randommer.io/api/Text/Review?quantity={quantity}&product={productName}",
@@ -49,6 +49,7 @@ class Mutation:
                             "product_reviewed": product,
                             "userId": str(currUser.id),
                             "productId": str(product.id),
+                            "rating": random.randint(1, 5),
                         }
                     )
                     await new_rev.insert()
@@ -75,6 +76,7 @@ class Mutation:
                             "product_reviewed": prod,
                             "userId": str(encoded_data["userID"]),
                             "productId": str(encoded_data["productID"]),
+                            "rating": int(encoded_data["rating"]),
                         }
                     )
                     rev_ins = await new_rev.insert()
