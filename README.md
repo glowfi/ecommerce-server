@@ -6,6 +6,10 @@
 -   Strawberry GraphQL
 -   Redis
 -   MongoDB
+-   Apache Kafka
+-   JWT Authentication
+-   Razorpay integration
+-   MongoDB Atlas full fuzzy search and autocompletion
 
 ### How to install
 
