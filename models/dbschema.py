@@ -82,6 +82,8 @@ class Product(Document):
     date_created_human: str
     description: str
     discount_percent: float
+    rating: float = Field(default=0.0)
+    total_reviews: int = Field(default=0)
     images: list[list[str]]
     on_sale: bool = Field(default=False)
     price: float

@@ -20,6 +20,8 @@ class Product:
     date_created_human: str
     description: str
     discount_percent: float
+    rating: float
+    total_reviews: int
     images: list[list[str]]
     on_sale: bool
     price: float
@@ -54,6 +56,8 @@ class InputProduct:
     sellerID: str
     stock: int
     title: str
+    rating: float
+    total_reviews: int
 
 
 @strawberry.input
@@ -69,6 +73,8 @@ class InputUpdateProduct:
     price: Optional[float] = strawberry.field(default_factory=float)
     stock: Optional[int] = strawberry.field(default_factory=int)
     title: Optional[str] = strawberry.field(default_factory=str)
+    rating: Optional[float] = strawberry.field(default_factory=float)
+    total_reviews: int
 
 
 @strawberry.type
@@ -91,11 +97,15 @@ class SearchResponse:
     id: str
     price: float
     score: float
+    paginationToken: str
     sellerName: str
     title: str
     coverImage: list[str]
+    rating: float
 
 
 @strawberry.type
 class SearchResponseResult:
-    data: list[SearchResponse]
+    data: list[SearchResponse] | None
+    lastToken: str | None
+    err: str | None

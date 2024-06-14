@@ -1,3 +1,4 @@
+from typing import Union
 import strawberry
 from Graphql.schema.product import (
     ResponseGetallProduct as rgpr,
@@ -38,55 +39,107 @@ class Query:
 
     @strawberry.field
     async def get_products_by_search_term_atlas_search(
-        self, term: str
+        self, term: str, limit: int, lastTokensaved: str
     ) -> SearchResponseResult:
-        data = await Product.aggregate(
-            aggregation_pipeline=[
-                {
-                    "$search": {
-                        "index": USER_SEARCH_INDEX_NAME,
-                        "text": {
-                            "query": term,
-                            "path": [
-                                "brand",
-                                "description",
-                                "categoryName",
-                                "sellerName",
-                                "title",
-                            ],
-                            "fuzzy": {},
+        try:
+            if lastTokensaved:
+                data = await Product.aggregate(
+                    aggregation_pipeline=[
+                        {
+                            "$search": {
+                                "index": USER_SEARCH_INDEX_NAME,
+                                "text": {
+                                    "query": term,
+                                    "path": [
+                                        "brand",
+                                        "description",
+                                        "categoryName",
+                                        "sellerName",
+                                        "title",
+                                    ],
+                                    "fuzzy": {},
+                                },
+                                "sort": {
+                                    "score": {"$meta": "searchScore"},
+                                },
+                                "searchAfter": lastTokensaved,
+                            },
                         },
-                    },
-                },
-                {"$limit": TOP_RESULTS},
-                {"$sort": {"score": 1}},
-                {
-                    "$project": {
-                        "_id": 1,
-                        "score": {"$meta": "searchScore"},
-                        "sellerName": 1,
-                        "brand": 1,
-                        "description": 1,
-                        "categoryName": 1,
-                        "coverImage": 1,
-                        "title": 1,
-                        "price": 1,
-                    },
-                },
-            ]
-        ).to_list()
+                        {"$limit": limit},
+                        {
+                            "$project": {
+                                "_id": 1,
+                                "score": {"$meta": "searchScore"},
+                                "paginationToken": {"$meta": "searchSequenceToken"},
+                                "sellerName": 1,
+                                "brand": 1,
+                                "description": 1,
+                                "categoryName": 1,
+                                "coverImage": 1,
+                                "title": 1,
+                                "price": 1,
+                                "rating": 1,
+                            },
+                        },
+                    ]
+                ).to_list()
+            else:
+                data = await Product.aggregate(
+                    aggregation_pipeline=[
+                        {
+                            "$search": {
+                                "index": USER_SEARCH_INDEX_NAME,
+                                "text": {
+                                    "query": term,
+                                    "path": [
+                                        "brand",
+                                        "description",
+                                        "categoryName",
+                                        "sellerName",
+                                        "title",
+                                    ],
+                                    "fuzzy": {},
+                                },
+                                "sort": {
+                                    "score": {"$meta": "searchScore"},
+                                },
+                            },
+                        },
+                        {"$limit": limit},
+                        {
+                            "$project": {
+                                "_id": 1,
+                                "score": {"$meta": "searchScore"},
+                                "paginationToken": {"$meta": "searchSequenceToken"},
+                                "sellerName": 1,
+                                "brand": 1,
+                                "description": 1,
+                                "categoryName": 1,
+                                "coverImage": 1,
+                                "title": 1,
+                                "price": 1,
+                                "rating": 1,
+                            },
+                        },
+                    ]
+                ).to_list()
+            final_data = []
 
-        final_data = []
-
-        for dic in data:
-            tmp = {}
-            for i in dic:
+            for dic in data:
+                tmp = {}
                 tmp = {**dic}
                 tmp["id"] = str(tmp["_id"])[:]
-                del tmp["_id"]
-            final_data.append(SearchResponse(**tmp))
 
-        return SearchResponseResult(data=final_data)
+                del tmp["_id"]
+                final_data.append(SearchResponse(**tmp))
+
+            return SearchResponseResult(
+                data=final_data,
+                lastToken=final_data[-1].paginationToken if final_data else "",
+                err=None,
+            )
+        except Exception as e:
+            return SearchResponseResult(data=None, lastToken=None, err=str(e))
 
     @strawberry.field
     async def get_products_by_search_term(self, term: str) -> rgpr:

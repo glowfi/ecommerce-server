@@ -185,6 +185,7 @@ class Query:
                 return rgrev(data=None, err=f"No User with {userID} exists!")
 
         except Exception as e:
+            print(e)
             return rgrev(data=None, err=str(e))
 
     @strawberry.field

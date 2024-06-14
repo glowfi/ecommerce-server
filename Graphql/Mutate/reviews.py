@@ -17,6 +17,34 @@ load_dotenv(find_dotenv(".env"))
 RANDOMMER_KEY = os.getenv("RANDOMMER_KEY")
 
 
+async def update_product_rating(productID):
+    pipeline = [
+        {"$match": {"productId": productID}},
+        {
+            "$group": {
+                "_id": None,
+                "average_rating": {"$avg": "$rating"},
+                "total_reviews": {"$sum": 1},
+            }
+        },
+    ]
+    getData = await Reviews.aggregate(aggregation_pipeline=pipeline).to_list()
+    print(getData)
+
+    # Find Product
+    prod = await Product.get(productID, fetch_links=True)
+
+    if getData and getData[0].get("average_rating", ""):
+        avgReviews = getData[0].get("average_rating")
+        totalReviews = getData[0].get("total_reviews")
+        print(avgReviews)
+
+        await prod.update(
+            {"$set": {"rating": avgReviews, "total_reviews": totalReviews}}
+        )
+        print("Done updating review!")
+
+
 @strawberry.type
 class Mutation:
 
@@ -52,6 +80,7 @@ class Mutation:
                             "rating": random.randint(1, 5),
                         }
                     )
+                    await update_product_rating(str(product.id))
                     await new_rev.insert()
 
             return "Done"
@@ -59,7 +88,7 @@ class Mutation:
             return str(e)
 
     @strawberry.mutation
-    async def create_review(self, data: ipre) -> rre:
+    async def create_review(self, data: ipre, info: strawberry.Info) -> rre:
         try:
             encoded_data = encode_input(data.__dict__)
             print(encoded_data)
@@ -80,6 +109,12 @@ class Mutation:
                         }
                     )
                     rev_ins = await new_rev.insert()
+
+                    info.context["background_tasks"].add_task(
+                        update_product_rating,
+                        str(encoded_data["productID"]),
+                    )
+
                     return rre(data=rev_ins, err=None)
                 else:
                     return rre(
