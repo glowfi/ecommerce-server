@@ -11,6 +11,8 @@ import requests
 import random
 import os
 from dotenv import find_dotenv, load_dotenv
+import urllib.parse
+
 
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
@@ -60,10 +62,14 @@ class Mutation:
 
             for product in allProducts:
                 productName = product.title
+                productName = productName[: min(len(productName) - 1, 50)]
                 quantity = 30
 
+                params = {"quantity": quantity, "product": productName}
+                query_string = urllib.parse.urlencode(params, doseq=True)
+
                 data = requests.post(
-                    f"https://randommer.io/api/Text/Review?quantity={quantity}&product={productName}",
+                    f"https://randommer.io/api/Text/Review?{query_string}",
                     headers={"X-Api-Key": RANDOMMER_KEY},
                 ).json()
 

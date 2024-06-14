@@ -1,6 +1,6 @@
 import strawberry
 
-from typing import TYPE_CHECKING, Annotated, Optional
+from typing import TYPE_CHECKING, Annotated, Optional, Union
 
 if TYPE_CHECKING:
     from .orders import Orders
@@ -33,7 +33,7 @@ class User:
     id: str
     email: str
     confirmed: bool
-    profile_pic: str
+    profile_pic: Union[str, None]
     name: str
     password: str
     dob: str
