@@ -22,7 +22,8 @@ FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 
 async def insert_one_user(user):
-    new_user = User(**user)
+    data = {**user, "confirmed": True}
+    new_user = User(**data)
     await new_user.insert()
 
 
