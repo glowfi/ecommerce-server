@@ -60,7 +60,7 @@ class Mutation:
                         )
                     else:
                         return rpres(
-                            data=None, err=f"No user with userID {encoded_data["id"]}"
+                            data=None, err=f"No user with userID {encoded_data['id']}"
                         )
         except Exception as e:
             return rpres(data=None, err=str(e))
