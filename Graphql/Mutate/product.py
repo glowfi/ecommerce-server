@@ -75,12 +75,12 @@ class Mutation:
                 else:
                     return rpr(
                         data=None,
-                        err=f"No category found with categoryID {encode_data["categoryID"]}",
+                        err=f"No category found with categoryID {encode_data['categoryID']}",
                     )
             else:
                 return rpr(
                     data=None,
-                    err=f"No such seller with sellerID {encode_data["sellerID"]}",
+                    err=f"No such seller with sellerID {encode_data['sellerID']}",
                 )
         except Exception as e:
             return rpr(data=None, err=str(e))
