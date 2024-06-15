@@ -19,7 +19,7 @@ class Mutation:
         hmap = {}
         for prod in data:
             hmap[prod["categoryID"]] = {
-                "name": f"{prod["category"]}",
+                "name": f"{prod['category']}",
                 "image": prod["categoryImage"],
             }
 
