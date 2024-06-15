@@ -18,7 +18,8 @@ class Mutation:
 
         all = []
         for prod in data:
-            all.append(Seller(**prod["seller_info"]))
+            data = {**prod["seller_info"]}
+            all.append(Seller(**data))
 
         await Seller.insert_many(all)
 

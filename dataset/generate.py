@@ -192,7 +192,7 @@ def get_address(number):
             currAddr = addr.split(",")
             tmp = {
                 "street_address": currAddr[0] + "," + currAddr[1],
-                "zip_code": int(currAddr[2].strip(" ")),
+                "zip_code": int(fake.zipcode()),
                 "city": currAddr[3],
                 "state": currAddr[4],
                 "country": country,
@@ -288,6 +288,7 @@ for prod in data:
     get_addr = get_address(1)[0]
     saved_code = get_addr["country_code_phone"]
     del get_addr["country_code_phone"]
+    get_addr["zip_code"] = int(fake.zipcode())
 
     seller = Seller()
     prod["seller_info"] = {
