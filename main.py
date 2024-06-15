@@ -12,6 +12,7 @@ from strawberry.fastapi import GraphQLRouter
 from fastapi.middleware.cors import CORSMiddleware
 import multiprocessing
 import uvicorn
+from mangum import Mangum
 
 # Read dotenv
 load_dotenv(find_dotenv(".env"))
@@ -85,14 +86,17 @@ schema = strawberry.Schema(query=Query, mutation=Mutation)
 graphql_app = GraphQLRouter(schema, graphql_ide=None, context_getter=get_context)
 app.include_router(graphql_app, prefix="/graphql")
 
+# if os.getenv("ENVIRONMENT") == "production":
+handler = Mangum(app)
+
 
 # Start uvicorn server
-if __name__ == "__main__":
-    # # uvicorn.run("main:app", host="localhost", port=5000, reload=True)
-    uvicorn.run(
-        "main:app",
-        workers=(multiprocessing.cpu_count() * 2) + 1,
-        # host="localhost",
-        # port=5000,
-        # reload=True,
-    )
+# if __name__ == "__main__":
+# # uvicorn.run("main:app", host="localhost", port=5000, reload=True)
+# uvicorn.run(
+#     "main:app",
+#     workers=(multiprocessing.cpu_count() * 2) + 1,
+#     # host="localhost",
+#     # port=5000,
+#     # reload=True,
+# )
