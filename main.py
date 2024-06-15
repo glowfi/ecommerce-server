@@ -82,9 +82,7 @@ def home():
 
 # Add graphql endpoint
 schema = strawberry.Schema(query=Query, mutation=Mutation)
-graphql_app = GraphQLRouter(
-    schema, graphql_ide="apollo-sandbox", context_getter=get_context
-)
+graphql_app = GraphQLRouter(schema, graphql_ide=None, context_getter=get_context)
 app.include_router(graphql_app, prefix="/graphql")
 
 
