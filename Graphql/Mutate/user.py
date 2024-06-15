@@ -12,12 +12,18 @@ from Graphql.schema.user import (
 import json
 from dotenv import load_dotenv, find_dotenv
 from helper.confirm_email import html_content_confirm_email
+import asyncio
 
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
 OTP_TOKEN_EXPIRE_MINUTES = os.getenv("OTP_TOKEN_EXPIRE_MINUTES")
 STORE_NAME = os.getenv("STORE_NAME")
 FRONTEND_URL = os.getenv("FRONTEND_URL")
+
+
+async def insert_one_user(user):
+    new_user = User(**user)
+    await new_user.insert()
 
 
 @strawberry.type
@@ -27,9 +33,8 @@ class Mutation:
         with open("./dataset/user.json") as fp:
             data = json.load(fp)
 
-        for user in data:
-            new_user = User(**user)
-            await new_user.insert()
+        tasks = [insert_one_user(user) for user in data]
+        await asyncio.gather(*tasks)
 
         return "Done!"
 

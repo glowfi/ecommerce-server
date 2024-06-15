@@ -1,4 +1,5 @@
 import json
+import asyncio
 import strawberry
 from models.dbschema import Reviews, User, Product
 from Graphql.schema.reviews import (
@@ -47,6 +48,35 @@ async def update_product_rating(productID):
         print("Done updating review!")
 
 
+async def insert_one_review(product, allUsers):
+    productName = product.title
+    productName = productName[: min(len(productName) - 1, 50)]
+    quantity = 30
+
+    params = {"quantity": quantity, "product": productName}
+    query_string = urllib.parse.urlencode(params, doseq=True)
+
+    data = requests.post(
+        f"https://randommer.io/api/Text/Review?{query_string}",
+        headers={"X-Api-Key": RANDOMMER_KEY},
+    ).json()
+
+    for review in data:
+        randomUserIdx = random.randint(0, len(allUsers) - 1)
+        currUser = allUsers[randomUserIdx]
+        new_rev = Reviews(
+            **{
+                "comment": review,
+                "user_reviewed": currUser,
+                "product_reviewed": product,
+                "userId": str(currUser.id),
+                "productId": str(product.id),
+                "rating": random.randint(1, 5),
+            }
+        )
+        await new_rev.insert()
+
+
 @strawberry.type
 class Mutation:
 
@@ -60,37 +90,15 @@ class Mutation:
             print(len(allUsers))
             print(len(allProducts))
 
-            for product in allProducts:
-                productName = product.title
-                productName = productName[: min(len(productName) - 1, 50)]
-                quantity = 30
+            tasks = [insert_one_review(product, allUsers) for product in allProducts]
+            await asyncio.gather(*tasks)
 
-                params = {"quantity": quantity, "product": productName}
-                query_string = urllib.parse.urlencode(params, doseq=True)
-
-                data = requests.post(
-                    f"https://randommer.io/api/Text/Review?{query_string}",
-                    headers={"X-Api-Key": RANDOMMER_KEY},
-                ).json()
-
-                for review in data:
-                    randomUserIdx = random.randint(0, len(allUsers) - 1)
-                    currUser = allUsers[randomUserIdx]
-                    new_rev = Reviews(
-                        **{
-                            "comment": review,
-                            "user_reviewed": currUser,
-                            "product_reviewed": product,
-                            "userId": str(currUser.id),
-                            "productId": str(product.id),
-                            "rating": random.randint(1, 5),
-                        }
-                    )
-                    await update_product_rating(str(product.id))
-                    await new_rev.insert()
+            tasks = [update_product_rating(str(product.id)) for product in allProducts]
+            await asyncio.gather(*tasks)
 
             return "Done"
         except Exception as e:
+            print(str(e))
             return str(e)
 
     @strawberry.mutation
