@@ -84,8 +84,8 @@ class Mutation:
     async def generate_review(self) -> str:
         try:
 
-            allUsers = await User.find_many(fetch_links=True).to_list()
-            allProducts = await Product.find_many(fetch_links=True).to_list()
+            allUsers = await User.find_many().to_list()
+            allProducts = await Product.find_many().to_list()
 
             print(len(allUsers))
             print(len(allProducts))

@@ -10,7 +10,7 @@ class Address(BaseModel):
     state: str
     country: str
     countryCode: str
-    zip_code: str
+    zip_code: int
 
 
 class User(Document):

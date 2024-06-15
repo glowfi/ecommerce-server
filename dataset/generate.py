@@ -192,7 +192,7 @@ def get_address(number):
             currAddr = addr.split(",")
             tmp = {
                 "street_address": currAddr[0] + "," + currAddr[1],
-                "zip_code": currAddr[2],
+                "zip_code": int(currAddr[2].strip(" ")),
                 "city": currAddr[3],
                 "state": currAddr[4],
                 "country": country,

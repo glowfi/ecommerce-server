@@ -15,7 +15,7 @@ class Address:
     state: str
     country: str
     countryCode: str
-    zip_code: str
+    zip_code: int
 
 
 @strawberry.input
@@ -25,7 +25,7 @@ class AddressInput:
     country: Optional[str] = strawberry.field(default_factory=str)
     countryCode: Optional[str] = strawberry.field(default_factory=str)
     state: Optional[str] = strawberry.field(default_factory=str)
-    zip_code: Optional[str] = strawberry.field(default_factory=str)
+    zip_code: Optional[int] = strawberry.field(default_factory=str)
 
 
 @strawberry.type
