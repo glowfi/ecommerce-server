@@ -90,17 +90,11 @@ app.include_router(graphql_app, prefix="/graphql")
 
 # Start uvicorn server
 if __name__ == "__main__":
-    WORKERS = (multiprocessing.cpu_count() * 2) + 1
-    PORT = 5555
-    os.system(
-        f"gunicorn main:app -w {WORKERS} -b 0.0.0.0:{PORT} -k uvicorn.workers.UvicornWorker --log-file=- --log-level DEBUG --reload"
-    )
-    # run_app()
     # # uvicorn.run("main:app", host="localhost", port=5000, reload=True)
-    # uvicorn.run(
-    #     "main:app",
-    #     workers=(multiprocessing.cpu_count() * 2) + 1,
-    #     # host="localhost",
-    #     # port=5000,
-    #     # reload=True,
-    # )
+    uvicorn.run(
+        "main:app",
+        workers=(multiprocessing.cpu_count() * 2) + 1,
+        # host="localhost",
+        # port=5000,
+        # reload=True,
+    )
