@@ -2,7 +2,7 @@ import os
 import strawberry
 from Middleware.jwtmanager import JWTManager
 from helper.sendmail import send_mail
-from helper.utils import encode_input
+from helper.utils import encode_input, get_pics
 from models.dbschema import User
 from Graphql.schema.user import (
     ResponseUser as ru,
@@ -44,6 +44,7 @@ class Mutation:
         try:
             encoded_data = encode_input(data.__dict__)
             new_user = User(**encoded_data)
+            encoded_data["profile_pic"] = get_pics(encoded_data["name"])
             user_ins = await new_user.insert()
 
             # Generate Token

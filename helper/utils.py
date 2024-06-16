@@ -1,8 +1,10 @@
+from typing import DefaultDict
 from fastapi.encoders import jsonable_encoder
 from email_validator import validate_email, EmailNotValidError
 from models.dbschema import Admin, Seller, User
 import random
 import string
+from genderize import Genderize
 
 
 # Encode Inputs
@@ -66,3 +68,25 @@ async def validate_inputs(email, password) -> tuple[bool, str]:
     elif not res_password[0]:
         return res_password
     return (True, "")
+
+
+def get_pics(name):
+    pics_default = {
+        "women": [
+            "https://ui.shadcn.com/avatars/01.png",
+            "https://ui.shadcn.com/avatars/03.png",
+            "https://ui.shadcn.com/avatars/05.png",
+        ],
+        "men": [
+            "https://ui.shadcn.com/avatars/02.png",
+            "https://ui.shadcn.com/avatars/04.png",
+        ],
+    }
+
+    gender = Genderize().get([name])[0]["gender"]
+    if gender == "male":
+        randIdx = random.randint(0, 1)
+        return pics_default["men"][randIdx]
+    else:
+        randIdx = random.randint(0, 2)
+        return pics_default["women"][randIdx]
