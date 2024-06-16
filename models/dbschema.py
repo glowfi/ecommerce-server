@@ -32,6 +32,9 @@ class User(Document):
         json_schema_extra={"original_field": "user_reviewed"}, default_factory=list
     )
 
+    class Settings:
+        is_root = True
+
     class Config:
         from_attributes = True
 
@@ -39,6 +42,9 @@ class User(Document):
 class Admin(Document):
     email: Indexed(str, unique=True)
     password: str
+
+    class Settings:
+        is_root = True
 
     class Config:
         from_attributes = True
@@ -58,6 +64,9 @@ class Seller(Document):
         json_schema_extra={"original_field": "seller"}, default_factory=list
     )
 
+    class Settings:
+        is_root = True
+
     class Config:
         from_attributes = True
 
@@ -68,6 +77,9 @@ class Category(Document):
     products_belonging: list[BackLink["Product"]] = Field(
         json_schema_extra={"original_field": "category"}, default_factory=list
     )
+
+    class Settings:
+        is_root = True
 
     class Config:
         from_attributes = True
@@ -101,6 +113,9 @@ class Product(Document):
         json_schema_extra={"original_field": "product_reviewed"}, default_factory=list
     )
 
+    class Settings:
+        is_root = True
+
     class Config:
         from_attributes = True
 
@@ -110,6 +125,9 @@ class Wishlist(Document):
     product_wished: Link["Product"]
     wishedAt: datetime = Field(default=datetime.now())
 
+    class Settings:
+        is_root = True
+
     class Config:
         from_attributes = True
 
@@ -118,6 +136,9 @@ class Razorpay(BaseModel):
     razorpay_payment_id: Optional[str] = Field(default_factory=str)
     razorpay_order_id: Optional[str] = Field(default_factory=str)
     razorpay_signature: Optional[str] = Field(default_factory=str)
+
+    class Settings:
+        is_root = True
 
 
 class Product_Ordered(Product):
@@ -142,6 +163,9 @@ class Orders(Document):
     shipping_fee: float
     tax: float
 
+    class Settings:
+        is_root = True
+
     class Config:
         from_attributes = True
 
@@ -155,6 +179,9 @@ class Reviews(Document):
     productId: str
     reviewedAt: datetime = Field(default=datetime.now())
 
+    class Settings:
+        is_root = True
+
     class Config:
         from_attributes = True
 
@@ -164,6 +191,9 @@ class OTP(Document):
     token: str
     lastUsed: datetime = Field(default=datetime.now())
     hasExpired: bool = Field(default=False)
+
+    class Settings:
+        is_root = True
 
     class Config:
         from_attributes = True
