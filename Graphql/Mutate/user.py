@@ -43,8 +43,8 @@ class Mutation:
     async def create_user(self, data: ipu, info: strawberry.Info) -> ru:
         try:
             encoded_data = encode_input(data.__dict__)
-            new_user = User(**encoded_data)
             encoded_data["profile_pic"] = get_pics(encoded_data["name"])
+            new_user = User(**encoded_data)
             user_ins = await new_user.insert()
 
             # Generate Token
