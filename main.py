@@ -63,7 +63,7 @@ app = FastAPI(
 )
 
 # Cors
-origins = ["*"]
+origins = [str(FRONTEND_URL)]
 
 app.add_middleware(
     CORSMiddleware,
@@ -82,7 +82,7 @@ def home():
 
 # Add graphql endpoint
 schema = strawberry.Schema(query=Query, mutation=Mutation)
-graphql_app = GraphQLRouter(schema, graphql_ide=None, context_getter=get_context)
+graphql_app = GraphQLRouter(schema, context_getter=get_context)
 app.include_router(graphql_app, prefix="/graphql")
 
 # if os.getenv("ENVIRONMENT") == "production":
@@ -90,11 +90,11 @@ app.include_router(graphql_app, prefix="/graphql")
 
 
 # Start uvicorn server
-if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        workers=(multiprocessing.cpu_count() * 2) + 1,
-        host="localhost",
-        port=5000,
-        reload=True,
-    )
+# if __name__ == "__main__":
+#     uvicorn.run(
+#         "main:app",
+#         workers=(multiprocessing.cpu_count() * 2) + 1,
+#         host="localhost",
+#         port=5000,
+#         reload=True,
+#     )
