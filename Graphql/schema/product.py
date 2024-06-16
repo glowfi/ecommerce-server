@@ -101,6 +101,7 @@ class SearchResponse:
     sellerName: str
     title: str
     coverImage: list[str]
+    discount_percent: float
     rating: float
 
 
