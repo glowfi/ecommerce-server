@@ -3,5 +3,14 @@
 WORKERS=8
 PORT=5000
 
-# gunicorn main:app -w "${WORKERS}" -b 0.0.0.0:"${PORT}" -k uvicorn.workers.UvicornWorker --log-file=- --log-level DEBUG --reload
-gunicorn main:app -w "${WORKERS}" -k uvicorn.workers.UvicornWorker
+# Source .env file
+export $(grep -v '^#' .env | xargs)
+
+if [[ "$STAGE" == "local" ]]; then
+	echo "$STAGE"
+	source ./env/bin/activate
+	fd . | grep *__pycache__/ | xargs -I "{}" rm -rf "{}"
+	uvicorn main:app --host "localhost" --port "${PORT}" --log-level "info" --reload
+else
+	gunicorn main:app -w "${WORKERS}" -k uvicorn.workers.UvicornWorker
+fi

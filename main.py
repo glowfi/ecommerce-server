@@ -86,15 +86,3 @@ graphql_app = GraphQLRouter(
     schema, graphql_ide="apollo-sandbox", context_getter=get_context
 )
 app.include_router(graphql_app, prefix="/graphql")
-
-
-# Start uvicorn server
-if __name__ == "__main__":
-    if os.getenv("STAGE") == "local":
-        uvicorn.run(
-            "main:app",
-            host="localhost",
-            port=5000,
-            reload=True,
-            log_level="info",
-        )
