@@ -79,6 +79,7 @@ class Query:
                                 "title": 1,
                                 "price": 1,
                                 "rating": 1,
+                                "discount_percent": 1,
                             },
                         },
                     ]
