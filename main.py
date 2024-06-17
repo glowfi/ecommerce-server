@@ -98,11 +98,3 @@ if __name__ == "__main__":
             reload=True,
             log_level="info",
         )
-    elif os.getenv("STAGE") == "production":
-        os.system(f"gunicorn main:app -w 8 -k uvicorn.workers.UvicornWorker")
-        # uvicorn.run(
-        #     "main:app",
-        #     host="localhost",
-        #     port=5000,
-        #     workers=8,
-        # )
