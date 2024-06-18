@@ -13,6 +13,7 @@ import random
 import os
 from dotenv import find_dotenv, load_dotenv
 import urllib.parse
+from better_profanity import profanity
 
 
 # Load dotenv
@@ -112,6 +113,8 @@ class Mutation:
                 # Find product
                 prod = await Product.get(encoded_data["productID"], fetch_links=True)
                 if prod:
+                    profanity.load_censor_words()
+                    encoded_data["comment"] = profanity.censor(encoded_data["comment"])
                     new_rev = Reviews(
                         **{
                             "comment": encoded_data["comment"],
