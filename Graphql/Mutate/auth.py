@@ -126,7 +126,7 @@ class Mutation:
                     data=None, err=f"Verify your account before logging in!"
                 )
 
-            elif not verify_password(data.password, checkUser[0].password):
+            elif verify_password(data.password, checkUser[0].password) is False:
                 return LoginResponse(data=None, err=f"Wrong Password entered!")
 
             else:
