@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional
 import strawberry
 
 
@@ -6,7 +6,7 @@ import strawberry
 class InputresetPassword:
     password: str
     token: str
-    userid: Union[str, None]
+    userid: Optional[str] = strawberry.field(default_factory=str)
 
 
 @strawberry.type

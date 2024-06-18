@@ -15,7 +15,7 @@ from helper.forget_password_html import html_content_forget_password
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
 OTP_TOKEN_EXPIRE_MINUTES = os.getenv("OTP_TOKEN_EXPIRE_MINUTES")
-STORE_NAME = os.getenv("STORE_NAME")
+STORE_NAME = " ".join(os.getenv("STORE_NAME").split("-"))
 FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 
@@ -61,6 +61,8 @@ class Mutation:
                     "body": html_content,
                 },
             )
+
+            print(f"{FRONTEND_URL}/auth/resetpassword/{token}")
 
             return ForgotPasswordResponse(
                 data=ForgotPassword(

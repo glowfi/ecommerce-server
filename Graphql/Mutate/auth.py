@@ -115,6 +115,8 @@ class Mutation:
 
         else:
             checkUser = await checkUserExists(data.email, data.userType)
+            print(data.password, checkUser[0].password)
+
             if not checkUser:
                 return LoginResponse(
                     data=None,

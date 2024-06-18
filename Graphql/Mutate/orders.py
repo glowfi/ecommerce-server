@@ -1,6 +1,7 @@
 import os
 import strawberry
 import razorpay
+from helper.reciep_email_html import paste_table
 from models.dbschema import Orders, User, Product
 from Graphql.schema.orders import (
     ResponseOrders as ror,
@@ -59,7 +60,7 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
                             "products_ordered": products_ordered_ref,
                             "razorpay_details": {"razorpay_order_id": razor_order_id},
                             "payment_by": encoded_data["payment_by"],
-                            "name": encoded_data["name"],
+                            "name": encoded_data["name"].title(),
                             "email": encoded_data["email"],
                             "phone_number": encoded_data["phone_number"],
                             "address": encoded_data["address"],
@@ -77,7 +78,7 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
                             "userid": str(user.id),
                             "products_ordered": products_ordered_ref,
                             "payment_by": encoded_data["payment_by"],
-                            "name": encoded_data["name"],
+                            "name": encoded_data["name"].title(),
                             "email": encoded_data["email"],
                             "phone_number": encoded_data["phone_number"],
                             "address": encoded_data["address"],
@@ -195,7 +196,7 @@ class Mutation:
             return [f"Error Occured {str(e)}"]
 
     @strawberry.mutation
-    async def update_order(self, data: ipuor) -> ror:
+    async def update_order(self, data: ipuor, info: strawberry.Info) -> ror:
         try:
             encoded_data = encode_input(data.__dict__)
             get_ord = await Orders.get(encoded_data["orderID"])
@@ -203,6 +204,19 @@ class Mutation:
             if get_ord:
                 ord_updated = await get_ord.update({"$set": encoded_data})
                 print("Order Updated!")
+
+                # Background task data base insertion of user details
+                info.context["background_tasks"].add_task(
+                    paste_table,
+                    get_ord.products_ordered,
+                    get_ord.tax,
+                    get_ord.shipping_fee,
+                    get_ord.id,
+                    get_ord.orderedAt,
+                    get_ord.email,
+                    get_ord.name,
+                )
+
                 return ror(data=ord_updated, err=None)
             else:
                 return ror(
