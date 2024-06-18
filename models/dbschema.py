@@ -16,7 +16,7 @@ class Address(BaseModel):
 class User(Document):
     email: Indexed(str, unique=True)
     name: str
-    password: str
+    password: Optional[str] = Field(default_factory=str)
     dob: Optional[str] = Field(default_factory=str)
     phone_number: Optional[str] = Field(default_factory=str)
     address: Optional[Address] = Field(default_factory=dict)

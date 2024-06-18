@@ -10,6 +10,14 @@ class InputLogin:
     userType: str
 
 
+@strawberry.input
+class InputGoogleLogin:
+    email: str
+    name: str
+    profile_pic: str
+    userType: str
+
+
 @strawberry.type
 class Login:
     userID: str

@@ -1,4 +1,5 @@
 import os
+from beanie import DeleteRules
 import strawberry
 from Middleware.jwtmanager import JWTManager
 from helper.sendmail import send_mail
@@ -95,8 +96,8 @@ class Mutation:
         try:
             get_user = await User.get(userID)
             if get_user:
-                user_deleted = await get_user.delete()
-                return ru(data=user_deleted, err=None)
+                user_deleted = await get_user.delete(link_rule=DeleteRules.DELETE_LINKS)
+                return ru(data=get_user, err=None)
             else:
                 return ru(data=None, err=f"No user with userID {userID}")
         except Exception as e:
