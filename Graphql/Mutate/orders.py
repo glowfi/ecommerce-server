@@ -106,7 +106,6 @@ async def add_user_to_db(encoded_data, info):
     try:
         # Find User
         user = await User.get(encoded_data["userID"], fetch_links=True)
-        # print(user)
 
         if user:
             # Upadate User
@@ -131,6 +130,9 @@ async def add_user_to_db(encoded_data, info):
 
             if new_user["address"]["zip_code"]:
                 user.address.zip_code = new_user["address"]["zip_code"]
+
+            if new_user["phone_number"]:
+                user.phone_number = new_user["phone_number"]
 
             await user.save()
             print("User added to DB!")
