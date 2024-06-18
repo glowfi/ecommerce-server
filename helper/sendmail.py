@@ -12,7 +12,7 @@ load_dotenv(find_dotenv(".env"))
 HOST = os.getenv("MAIL_HOST")
 USERNAME = os.getenv("MAIL_USERNAME")
 EMAIL = os.getenv("MAIL_EMAIL")
-PASSWORD = os.getenv("MAIL_PASSWORD")
+PASSWORD = " ".join(os.getenv("MAIL_PASSWORD").split("-"))
 PORT = os.getenv("MAIL_PORT")
 
 

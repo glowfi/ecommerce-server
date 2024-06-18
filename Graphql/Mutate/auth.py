@@ -1,3 +1,4 @@
+from helper.password import verify_password
 from models.dbschema import User
 import strawberry
 from Graphql.schema.auth import (
@@ -87,7 +88,7 @@ class Mutation:
             details = await user_generate_token(user, data, info)
             return LoginResponse(data=details, err=None)
         else:
-            # create user & generate_token
+            # if user do not exist then create user & generate_token
             encoded_data = encode_input(data.__dict__)
             address = {
                 "street_address": "",
@@ -125,7 +126,7 @@ class Mutation:
                     data=None, err=f"Verify your account before logging in!"
                 )
 
-            elif checkUser[0].password != data.password:
+            elif not verify_password(data.password, checkUser[0].password):
                 return LoginResponse(data=None, err=f"Wrong Password entered!")
 
             else:

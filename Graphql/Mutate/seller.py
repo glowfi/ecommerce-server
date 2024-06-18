@@ -1,5 +1,6 @@
 import strawberry
 import json
+from helper.password import get_password_hash
 from helper.utils import encode_input
 from models.dbschema import Seller
 from Graphql.schema.seller import (
@@ -29,6 +30,7 @@ class Mutation:
     async def create_seller(self, data: ipse) -> rse:
         try:
             encoded_data = encode_input(data.__dict__)
+            encoded_data["password"] = get_password_hash(encoded_data["password"])
             new_seller = Seller(**encoded_data)
             seller_ins = await new_seller.insert()
             return rse(data=seller_ins, err=None)

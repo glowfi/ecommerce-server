@@ -14,6 +14,7 @@ import json
 from dotenv import load_dotenv, find_dotenv
 from helper.confirm_email import html_content_confirm_email
 import asyncio
+from helper.password import get_password_hash
 
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
@@ -45,6 +46,7 @@ class Mutation:
         try:
             encoded_data = encode_input(data.__dict__)
             encoded_data["profile_pic"] = get_pics(encoded_data["name"])
+            encoded_data["password"] = get_password_hash(encoded_data["password"])
             new_user = User(**encoded_data)
             user_ins = await new_user.insert()
 

@@ -5,6 +5,7 @@ from Graphql.schema.resetpassword import (
     resetPassword,
     resetPasswordResponse as rpres,
 )
+from helper.password import get_password_hash
 from helper.utils import encode_input
 from models.dbschema import User, OTP
 
@@ -27,6 +28,11 @@ class Mutation:
                         data=None, err=f"No user with userid {encoded_data['userid']}!"
                     )
                 else:
+                    encoded_data["password"] = get_password_hash(
+                        encoded_data["password"]
+                    )
+                    await get_user.update({"$set": encoded_data})
+
                     return rpres(
                         data=resetPassword(
                             userid=encoded_data["userid"], token=encoded_data["token"]
@@ -50,6 +56,10 @@ class Mutation:
 
                         # Get User
                         del encoded_data["token"]
+                        encoded_data["password"] = get_password_hash(
+                            encoded_data["password"]
+                        )
+
                         await get_user.update({"$set": encoded_data})
 
                         return rpres(

@@ -2,6 +2,7 @@ import strawberry
 from Graphql.schema.admin import ResponseAdmin as rad, InputAdmin as ipad
 from models.dbschema import Admin
 from helper.utils import encode_input, validate_inputs
+from helper.password import get_password_hash
 
 
 @strawberry.type
@@ -17,6 +18,7 @@ class Mutation:
         if not res[0]:
             return rad(data=None, err=res[1])
         else:
+            encoded_data["password"] = get_password_hash(encoded_data["password"])
             new_admin = Admin(**encoded_data)
             ins_admin = await new_admin.insert()
             return rad(data=ins_admin, err=None)
