@@ -449,7 +449,7 @@ close_account_html = """
   <![endif]-->
   </head>
   <body>
-    <span class="preheader">This is a receipt for your recent purchase on {{ purchase_date }}. No payment is due with this receipt.</span>
+    <span class="preheader">This is a final goodbye from [Product Name] .</span>
     <table class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
       <tr>
         <td align="center">
@@ -484,7 +484,7 @@ close_account_html = """
                             </td>
                           </tr>
                         </table>
-                        <p>If you have any questions about this receipt, simply reply to this email or reach out to our <a href="{{support_url}}">support team</a> for help.</p>
+                        <p>If you have any questions, simply reply to this email or reach out to our <a href="{{support_url}}">support team</a> for help.</p>
                         <p>Cheers,
                           <br>The [Product Name] team</p>
                       </div>
