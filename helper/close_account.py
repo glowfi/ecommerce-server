@@ -1,3 +1,4 @@
+from beanie import DeleteRules
 from dotenv import load_dotenv, find_dotenv
 import os
 
@@ -516,10 +517,11 @@ close_account_html = """
 """
 
 
-def send_mail_close_account(reciever, name):
+async def send_mail_close_account(user):
+    await user.delete(link_rule=DeleteRules.DELETE_LINKS)
     global close_account_html
     close_account_html = close_account_html.replace("[Product Name]", str(STORE_NAME))
-    close_account_html = close_account_html.replace("{{name}}", name)
+    close_account_html = close_account_html.replace("{{name}}", user.name)
     close_account_html = close_account_html.replace("{{support_url}}", "")
     close_account_html = close_account_html.replace(
         "[Company Name, LLC]", f"{STORE_NAME} LLC"
@@ -527,8 +529,8 @@ def send_mail_close_account(reciever, name):
 
     send_mail(
         {
-            "to": [reciever],
-            "subject": "Order Receipt",
+            "to": [user.email],
+            "subject": "Account Closed",
             "body": close_account_html,
         }
     )

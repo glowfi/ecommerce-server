@@ -1,5 +1,6 @@
 import os
 from beanie import DeleteRules
+from bson import ObjectId
 import strawberry
 from Middleware.jwtmanager import JWTManager
 from helper.close_account import send_mail_close_account
@@ -105,11 +106,12 @@ class Mutation:
     @strawberry.mutation
     async def delete_user(self, userID: str, info: strawberry.Info) -> ru:
         try:
-            get_user = await User.get(userID)
+            get_user = await User.find_one(
+                User.id == ObjectId(userID), fetch_links=True
+            )
             if get_user:
-                await get_user.delete(link_rule=DeleteRules.DELETE_LINKS)
                 info.context["background_tasks"].add_task(
-                    send_mail_close_account, get_user.email, get_user.name
+                    send_mail_close_account, get_user
                 )
                 return ru(data=get_user, err=None)
             else:
