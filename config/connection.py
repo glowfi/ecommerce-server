@@ -62,6 +62,7 @@ class BeanieConnection:
                 OTP,
             ],
         )
+        print("Beanie Connected!", self.DB_URL)
 
     async def findIndexByName(self, indexName: str):
         URL = f"{ATLAS_SEARCH_INDEX_API_URL}/{MONGODB_DATABASE}/{MONGODB_COLLECTION}"
@@ -136,7 +137,7 @@ class BeanieConnection:
             pass
 
     async def disconnect(self):
-        pass
+        print("Beanie Connected!", self.DB_URL)
 
 
 beanie_connection = BeanieConnection()
