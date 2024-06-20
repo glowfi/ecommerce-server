@@ -65,14 +65,14 @@ class ModifyResponseBodyMiddleware(BaseHTTPMiddleware):
                                 "accessToken",
                                 accToken,
                                 httponly=True,
-                                samesite="lax",
+                                samesite="none",
                                 secure=True,
                             )
                             curr_resp.set_cookie(
                                 "refreshToken",
                                 refToken,
                                 httponly=True,
-                                samesite="lax",
+                                samesite="none",
                                 secure=True,
                             )
 
