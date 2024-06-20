@@ -9,9 +9,9 @@ import strawberry
 from Graphql.mutation import Mutation
 from Graphql.query import Query
 from strawberry.fastapi import GraphQLRouter
-import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
-import multiprocessing
+from Middleware.modifyrequest import ModifyRequestBodyMiddleware
+from Middleware.modifyresponse import ModifyResponseBodyMiddleware
 
 # Read dotenv
 load_dotenv(find_dotenv(".env"))
@@ -60,11 +60,15 @@ app = FastAPI(
     title="Ecommerce", description="Fast API", version="1.0.0", lifespan=lifespan
 )
 
+# Custom middleware
+if os.getenv("STAGE") == "production":
+    app.add_middleware(ModifyRequestBodyMiddleware)
+    app.add_middleware(ModifyResponseBodyMiddleware)
+
 # Cors
 origins = [
     str(FRONTEND_URL),
 ]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
