@@ -11,6 +11,7 @@ from dotenv import find_dotenv, load_dotenv
 # Read dotenv
 load_dotenv(find_dotenv(".env"))
 secret = os.getenv("SECRET_REQ_RES")
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 
 class ModifyResponseBodyMiddleware(BaseHTTPMiddleware):
@@ -65,12 +66,14 @@ class ModifyResponseBodyMiddleware(BaseHTTPMiddleware):
                                 accToken,
                                 httponly=True,
                                 samesite="strict",
+                                domain=str(FRONTEND_URL),
                             )
                             curr_resp.set_cookie(
                                 "refreshToken",
                                 refToken,
                                 httponly=True,
                                 samesite="strict",
+                                domain=str(FRONTEND_URL),
                             )
 
                             return curr_resp
