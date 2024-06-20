@@ -47,7 +47,6 @@ class BeanieConnection:
     async def connect(self):
         client = AsyncIOMotorClient(self.DB_URL)
         db = client["ecommerce"]
-        print("Beanie Connected!", self.DB_URL)
 
         await init_beanie(
             database=db,
@@ -74,7 +73,6 @@ class BeanieConnection:
                     password=str(ATLAS_API_PRIVATE_KEY),
                 )
                 r = await client.get(URL, auth=auth)
-                print(r.status_code)
 
                 res = []
                 for indexex in r.json():
@@ -83,7 +81,6 @@ class BeanieConnection:
                             res.append(indexName)
                 return res
         except Exception as e:
-            print(str(e))
             return []
 
     async def upsertSearchIndex(self):
@@ -134,14 +131,12 @@ class BeanieConnection:
                         "Accept": "application/vnd.atlas.2024-05-30+json",
                     },
                 )
-                print(r.status_code)
-                print(r.json())
 
         else:
-            print("Not Creating indexes because index already exist!")
+            pass
 
     async def disconnect(self):
-        print("Beanie Disconnected!")
+        pass
 
 
 beanie_connection = BeanieConnection()

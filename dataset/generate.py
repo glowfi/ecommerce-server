@@ -158,7 +158,6 @@ def get_phone_numbers(country_code, quantity):
         f"https://randommer.io/api/Phone/Generate?CountryCode={country_code}&quantity={quantity}",
         headers={"X-Api-Key": RANDOMMER_KEY},
     ).json()
-    print(numbers)
     return numbers
 
 
@@ -166,7 +165,6 @@ def get_random_country_code_and_country():
     currData = get_country_and_country_code_lookup()
 
     random_country = random.choice(list(currData[0]))
-    print(random_country)
 
     country_code = str(currData[0][random_country])
     country_code_phone = str(currData[1][random_country])
@@ -243,7 +241,6 @@ def get_all():
         dobs,
         addresses,
     ):
-        print(addr)
         saved_code = addr["country_code_phone"]
         del addr["country_code_phone"]
 

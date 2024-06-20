@@ -1,3 +1,4 @@
+import os
 import strawberry
 from models.dbschema import Wishlist, User, Product
 from Graphql.schema.wishlist import (
@@ -5,13 +6,22 @@ from Graphql.schema.wishlist import (
     InputWishlist as ipwi,
     # InputUpdateWishlist as ipuwi,
 )
-from helper.utils import encode_input
+from helper.utils import encode_input, retval
+from Middleware.jwtbearer import IsAuthenticated
+from dotenv import load_dotenv, find_dotenv
+
+
+# Load dotenv
+load_dotenv(find_dotenv(".env"))
+STAGE = os.getenv("STAGE")
 
 
 @strawberry.type
 class Mutation:
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def create_wish(self, data: ipwi) -> rwi:
         try:
             encoded_data = encode_input(data.__dict__)
@@ -55,7 +65,9 @@ class Mutation:
     #     except Exception as e:
     #         return rwi(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def delete_wish(self, wishID: str) -> rwi:
         try:
             get_wish = await Wishlist.get(wishID)
@@ -67,7 +79,9 @@ class Mutation:
         except Exception as e:
             return rwi(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def get_wish_by_id(self, wishID: str) -> rwi:
         try:
             get_wish = await Wishlist.get(wishID)

@@ -1,13 +1,14 @@
 import json
 import asyncio
 import strawberry
+from Middleware.jwtbearer import IsAuthenticated
 from models.dbschema import Reviews, User, Product
 from Graphql.schema.reviews import (
     ResponseReviews as rre,
     InputReviews as ipre,
     InputUpdateReviews as ipure,
 )
-from helper.utils import encode_input
+from helper.utils import encode_input, retval
 import requests
 import random
 import os
@@ -19,6 +20,7 @@ from better_profanity import profanity
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
 RANDOMMER_KEY = os.getenv("RANDOMMER_KEY")
+STAGE = os.getenv("STAGE")
 
 
 async def update_product_rating(productID):
@@ -33,7 +35,6 @@ async def update_product_rating(productID):
         },
     ]
     getData = await Reviews.aggregate(aggregation_pipeline=pipeline).to_list()
-    print(getData)
 
     # Find Product
     prod = await Product.get(productID, fetch_links=True)
@@ -41,12 +42,10 @@ async def update_product_rating(productID):
     if getData and getData[0].get("average_rating", ""):
         avgReviews = getData[0].get("average_rating")
         totalReviews = getData[0].get("total_reviews")
-        print(avgReviews)
 
         await prod.update(
             {"$set": {"rating": avgReviews, "total_reviews": totalReviews}}
         )
-        print("Done updating review!")
 
 
 async def insert_one_review(product, allUsers):
@@ -81,15 +80,14 @@ async def insert_one_review(product, allUsers):
 @strawberry.type
 class Mutation:
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def generate_review(self) -> str:
         try:
 
             allUsers = await User.find_many().to_list()
             allProducts = await Product.find_many().to_list()
-
-            print(len(allUsers))
-            print(len(allProducts))
 
             tasks = [insert_one_review(product, allUsers) for product in allProducts]
             await asyncio.gather(*tasks)
@@ -99,14 +97,14 @@ class Mutation:
 
             return "Done"
         except Exception as e:
-            print(str(e))
             return str(e)
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def create_review(self, data: ipre, info: strawberry.Info) -> rre:
         try:
             encoded_data = encode_input(data.__dict__)
-            print(encoded_data)
             # Find User
             user = await User.get(encoded_data["userID"], fetch_links=True)
             if user:
@@ -146,7 +144,9 @@ class Mutation:
         except Exception as e:
             return rre(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def update_review(self, data: ipure, reviewID: str) -> rre:
         try:
             encoded_data = encode_input(data.__dict__)
@@ -159,7 +159,9 @@ class Mutation:
         except Exception as e:
             return rre(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def delete_review(self, reviewID: str) -> rre:
         try:
             get_rev = await Reviews.get(reviewID)
@@ -171,7 +173,9 @@ class Mutation:
         except Exception as e:
             return rre(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def get_review_by_id(self, reviewID: str) -> rre:
         try:
             get_rev = await Reviews.get(reviewID)

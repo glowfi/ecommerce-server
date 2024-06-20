@@ -62,8 +62,6 @@ class Mutation:
                 },
             )
 
-            print(f"{FRONTEND_URL}/auth/resetpassword/{token}")
-
             return ForgotPasswordResponse(
                 data=ForgotPassword(
                     email=data.email,

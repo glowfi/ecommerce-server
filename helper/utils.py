@@ -5,6 +5,9 @@ from models.dbschema import Admin, Seller, User
 import random
 import string
 from genderize import Genderize
+from strawberry.permission import BasePermission
+from strawberry.types import Info
+import typing
 
 
 # Encode Inputs
@@ -90,3 +93,10 @@ def get_pics(name):
     else:
         randIdx = random.randint(0, 2)
         return pics_default["women"][randIdx]
+
+
+class retval(BasePermission):
+    message = "User is not Authenticated"
+
+    async def has_permission(self, source: typing.Any, info: Info, **kwargs) -> bool:
+        return True

@@ -30,6 +30,19 @@ class JWTManager:
         return encode_jwt
 
     @staticmethod
+    async def verify_jwt_auth(token: str):
+        try:
+            decode_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            current_timestamp = datetime.utcnow().timestamp()
+            if not decode_token:
+                raise ValueError("Invalid token")
+            elif decode_token["exp"] <= current_timestamp:
+                raise ValueError("Token expired")
+            return [True, None]
+        except ValueError as error:
+            return [False, error]
+
+    @staticmethod
     async def verify_jwt(token: str):
         try:
             decode_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -40,7 +53,6 @@ class JWTManager:
                 raise ValueError("Token expired!")
             return True
         except ValueError as error:
-            print(error)
             return False
 
     @staticmethod
@@ -52,5 +64,4 @@ class JWTManager:
                 raise ValueError("Token expired!")
             return decode_token
         except ValueError as error:
-            print(error)
             return None

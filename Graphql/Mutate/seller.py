@@ -1,18 +1,28 @@
 import strawberry
 import json
 from helper.password import get_password_hash
-from helper.utils import encode_input
+from helper.utils import encode_input, retval
 from models.dbschema import Seller
 from Graphql.schema.seller import (
     ResponseSeller as rse,
     InputSeller as ipse,
     InputUpdateSeller as ipuse,
 )
+from dotenv import find_dotenv, load_dotenv
+import os
+from Middleware.jwtbearer import IsAuthenticated
+
+
+# Load dotenv
+load_dotenv(find_dotenv(".env"))
+STAGE = os.getenv("STAGE")
 
 
 @strawberry.type
 class Mutation:
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def insert_sellers_from_dataset() -> str:
         with open("./dataset/dataset.json") as fp:
             data = json.load(fp)
@@ -26,7 +36,9 @@ class Mutation:
 
         return "Done!"
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def create_seller(self, data: ipse) -> rse:
         try:
             encoded_data = encode_input(data.__dict__)
@@ -38,7 +50,9 @@ class Mutation:
         except Exception as e:
             return rse(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def update_seller(self, data: ipuse, sellerID: str) -> rse:
         try:
             encoded_data = encode_input(data.__dict__)
@@ -51,7 +65,9 @@ class Mutation:
         except Exception as e:
             return rse(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def delete_seller(self, sellerID: str) -> rse:
         try:
             get_seller = await Seller.get(sellerID)
@@ -63,7 +79,9 @@ class Mutation:
         except Exception as e:
             return rse(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def get_seller_by_id(self, sellerID: str) -> rse:
         try:
             get_seller = await Seller.get(sellerID)

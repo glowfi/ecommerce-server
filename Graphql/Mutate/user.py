@@ -5,7 +5,7 @@ import strawberry
 from Middleware.jwtmanager import JWTManager
 from helper.close_account import send_mail_close_account
 from helper.sendmail import send_mail
-from helper.utils import encode_input, get_pics
+from helper.utils import encode_input, get_pics, retval
 from models.dbschema import User
 from Graphql.schema.user import (
     ResponseUser as ru,
@@ -17,12 +17,15 @@ from dotenv import load_dotenv, find_dotenv
 from helper.confirm_email import html_content_confirm_email
 import asyncio
 from helper.password import get_password_hash
+from Middleware.jwtbearer import IsAuthenticated
+
 
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
 OTP_TOKEN_EXPIRE_MINUTES = os.getenv("OTP_TOKEN_EXPIRE_MINUTES")
 STORE_NAME = " ".join(os.getenv("STORE_NAME").split("-"))
 FRONTEND_URL = os.getenv("FRONTEND_URL")
+STAGE = os.getenv("STAGE")
 
 
 async def insert_one_user(user):
@@ -33,7 +36,9 @@ async def insert_one_user(user):
 
 @strawberry.type
 class Mutation:
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def insert_users_from_dataset() -> str:
         with open("./dataset/user.json") as fp:
             data = json.load(fp)
@@ -73,8 +78,6 @@ class Mutation:
                     .replace("[Company Name, LLC]", f"{STORE_NAME} LLC")
                 )
 
-                print(f"{FRONTEND_URL}/auth/verifyaccount/{token}")
-
                 # Send email
                 info.context["background_tasks"].add_task(
                     send_mail,
@@ -90,7 +93,9 @@ class Mutation:
         except Exception as e:
             return ru(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def update_user(self, data: ipuu, userID: str) -> ru:
         try:
             encoded_data = encode_input(data.__dict__)
@@ -103,7 +108,9 @@ class Mutation:
         except Exception as e:
             return ru(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def delete_user(self, userID: str, info: strawberry.Info) -> ru:
         try:
             get_user = await User.find_one(
@@ -119,7 +126,9 @@ class Mutation:
         except Exception as e:
             return ru(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def get_user_by_id(self, userID: str) -> ru:
         try:
             get_user = await User.get(userID)

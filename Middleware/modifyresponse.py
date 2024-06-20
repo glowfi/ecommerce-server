@@ -1,4 +1,5 @@
 import os
+from httpx import get
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
@@ -40,13 +41,48 @@ class ModifyResponseBodyMiddleware(BaseHTTPMiddleware):
                 res = data.get("data", {}).get("__schema", {}).get("queryType")
                 if not res:
                     modified_response = _encrypt(secret, json.dumps(data))
+                    currTask = data.get("data", {})
+                    if "login" in currTask or "loginGoogle" in currTask:
+                        getData = None
+                        if "login" in currTask:
+                            getData = currTask.get("login", {}).get("data", {})
+                        elif "loginGoogle" in currTask:
+                            getData = currTask.get("loginGoogle", {}).get("data", {})
+                        if getData:
+                            accToken, refToken = (
+                                getData["accToken"],
+                                getData["refToken"],
+                            )
+
+                            curr_resp = Response(
+                                content=modified_response,
+                                status_code=response.status_code,
+                                media_type=response.media_type,
+                            )
+
+                            curr_resp.set_cookie(
+                                "accessToken",
+                                accToken,
+                                httponly=True,
+                                samesite="strict",
+                            )
+                            curr_resp.set_cookie(
+                                "refreshToken",
+                                refToken,
+                                httponly=True,
+                                samesite="strict",
+                            )
+
+                            return curr_resp
+
                     return Response(
                         content=modified_response,
                         status_code=response.status_code,
                         media_type=response.media_type,
                     )
             except Exception as e:
-                print(e)
+                pass
+
             return Response(
                 content=response_body,
                 status_code=response.status_code,

@@ -8,7 +8,14 @@ from Graphql.schema.product import (
     ResponseProduct as rpr,
     InputUpdateProduct as iupr,
 )
-from helper.utils import encode_input
+from helper.utils import encode_input, retval
+from dotenv import load_dotenv, find_dotenv
+from Middleware.jwtbearer import IsAuthenticated
+import os
+
+# Load dotenv
+load_dotenv(find_dotenv(".env"))
+STAGE = str(os.getenv("STAGE"))
 
 
 async def insert_one_product(prod):
@@ -44,7 +51,9 @@ async def insert_one_product(prod):
 
 @strawberry.type
 class Mutation:
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def insert_products_from_dataset() -> str:
         with open("./dataset/dataset.json") as fp:
             data = json.load(fp)
@@ -53,7 +62,9 @@ class Mutation:
         await asyncio.gather(*tasks)
         return "Done!"
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def insert_product(self, data: ipr) -> rpr:
         try:
             encode_data = encode_input(data.__dict__)
@@ -85,7 +96,9 @@ class Mutation:
         except Exception as e:
             return rpr(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def update_product(self, data: iupr, productID: str) -> rpr:
         try:
             encode_data = encode_input(data.__dict__)
@@ -102,7 +115,9 @@ class Mutation:
         except Exception as e:
             return rpr(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def delete_product(self, productID: str) -> rpr:
         try:
             prod = await Product.get(productID, fetch_links=True)

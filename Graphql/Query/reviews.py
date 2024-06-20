@@ -5,7 +5,15 @@ from Graphql.schema.reviews import (
     ReviewsPercentage,
     ReviewsPercentageResponse,
 )
+from Middleware.jwtbearer import IsAuthenticated
+from helper.utils import retval
 from models.dbschema import Product, Reviews, User
+from dotenv import load_dotenv, find_dotenv
+import os
+
+# Load dotenv
+load_dotenv(find_dotenv(".env"))
+STAGE = os.getenv("STAGE")
 
 
 @strawberry.type
@@ -138,12 +146,13 @@ class Query:
         except Exception as e:
             return ReviewsPercentageResponse(data=None, err=str(e))
 
-    @strawberry.field
+    @strawberry.field(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def get_all_reviews_by_user_id(
         self, userID: str, skipping: int, limit: int
     ) -> rgrev:
         try:
-            print(userID, skipping, limit)
             getUser = await User.get(userID)
             if getUser:
                 # data = (
@@ -185,7 +194,6 @@ class Query:
                 return rgrev(data=None, err=f"No User with {userID} exists!")
 
         except Exception as e:
-            print(e)
             return rgrev(data=None, err=str(e))
 
     @strawberry.field

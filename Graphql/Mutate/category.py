@@ -1,17 +1,26 @@
 import strawberry
 import json
+from Middleware.jwtbearer import IsAuthenticated
 from models.dbschema import Category
 from Graphql.schema.category import (
     ResponseCategory as rca,
     InputCategory as ipca,
     InputUpdateCategory as ipuca,
 )
-from helper.utils import encode_input
+from helper.utils import encode_input, retval
+from dotenv import find_dotenv, load_dotenv
+import os
+
+# Load dotenv
+load_dotenv(find_dotenv(".env"))
+STAGE = str(os.getenv("STAGE"))
 
 
 @strawberry.type
 class Mutation:
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def insert_categories_from_dataset(self) -> str:
         with open("./dataset/dataset.json") as fp:
             data = json.load(fp)
@@ -33,7 +42,9 @@ class Mutation:
 
         return "Done"
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def create_category(self, data: ipca) -> rca:
         try:
             encode_data = encode_input(data.__dict__)
@@ -43,7 +54,9 @@ class Mutation:
         except Exception as e:
             return rca(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def update_category(self, data: ipuca, categoryID: str) -> rca:
         try:
             encode_data = encode_input(data.__dict__)
@@ -59,7 +72,9 @@ class Mutation:
         except Exception as e:
             return rca(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def delete_category(self, categoryID: str) -> rca:
         try:
             get_cat = await Category.get(categoryID, fetch_links=True)

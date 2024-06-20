@@ -38,12 +38,3 @@ def _decrypt(s, edata):
     edata = base64.urlsafe_b64decode(edata)
     aes = get_aes(s)
     return unpad(aes.decrypt(edata)).decode("utf-8")
-
-    # if __name__ == "__main__":
-    # encoded = "pT2pdsPSBetP+TmGTJY7CQ=="
-    # value = "hello world"
-    # encoded = _encrypt(secret, value)
-    # print("encoded:", encoded)
-
-    decoded = _decrypt(secret, encoded)
-    print("decoded:", decoded)

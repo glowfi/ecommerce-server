@@ -11,12 +11,15 @@ from Graphql.schema.auth import (
 from Middleware.jwtmanager import JWTManager
 from dotenv import find_dotenv, load_dotenv
 import os
+import json
+from Middleware.jwtbearer import IsAuthenticated
 
-from helper.utils import checkUserExists, encode_input
+from helper.utils import checkUserExists, encode_input, retval
 
 
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
+STAGE = str(os.getenv("STAGE"))
 REFRESH_TOKEN_EXPIRE_MINUTES = os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES")
 
 
@@ -32,6 +35,7 @@ async def user_generate_token(checkUser, data, info):
     accToken = await JWTManager.generate_token(detail)
     detail["accToken"] = accToken
     refToken = await JWTManager.generate_token(detail, REFRESH_TOKEN_EXPIRE_MINUTES)
+    detail["refToken"] = refToken
 
     userID = str(checkUser[0].id)
     res = info.context["response"]
@@ -40,14 +44,13 @@ async def user_generate_token(checkUser, data, info):
     redis = info.context["redis_client"]
     await redis.set(
         userID,
-        refToken,
-        ex=(int(REFRESH_TOKEN_EXPIRE_MINUTES) * 60),
+        json.dumps(
+            {"refToken": refToken, "maxAge": int(REFRESH_TOKEN_EXPIRE_MINUTES) * 60}
+        ),
     )
 
-    res.headers["Authorization"] = accToken
+    res.set_cookie("accessToken", accToken, httponly=True, samesite="strict")
     res.set_cookie("refreshToken", refToken, httponly=True, samesite="strict")
-
-    print(checkUser[0].address)
 
     details = Login(
         **{
@@ -63,7 +66,9 @@ async def user_generate_token(checkUser, data, info):
 @strawberry.type
 class Mutation:
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def logout(self, userID: str, info: strawberry.Info) -> LogoutResponse:
         try:
             # Get redis object
@@ -83,7 +88,6 @@ class Mutation:
         user = await checkUserExists(data.email, data.userType)
 
         if user:
-            print("User exits!")
             # generate token
             details = await user_generate_token(user, data, info)
             return LoginResponse(data=details, err=None)

@@ -22,6 +22,7 @@ class InputGoogleLogin:
 class Login:
     userID: str
     accToken: str
+    refToken: str
     email: str
     profile_pic: str
     name: str

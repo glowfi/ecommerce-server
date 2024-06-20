@@ -630,8 +630,6 @@ class="f-fallback purchase_total"
 
 
 def paste_table(products, tax, shipping_fee, order_id, orderedAt, reciever, name):
-
-    print(products, tax, shipping_fee, order_id, orderedAt, reciever, name)
     init_table = ""
     amount, total = 0, 0
 

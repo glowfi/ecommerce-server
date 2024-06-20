@@ -1,6 +1,7 @@
 import os
 import strawberry
 import razorpay
+from Middleware.jwtbearer import IsAuthenticated
 from helper.reciep_email_html import paste_table
 from models.dbschema import Orders, User, Product
 from Graphql.schema.orders import (
@@ -8,7 +9,7 @@ from Graphql.schema.orders import (
     InputOrders as ipor,
     InputUpdateOrders as ipuor,
 )
-from helper.utils import encode_input, generate_random_alphanumeric
+from helper.utils import encode_input, generate_random_alphanumeric, retval
 from dotenv import load_dotenv, find_dotenv
 from beanie.odm.operators.find.comparison import In
 
@@ -18,6 +19,7 @@ load_dotenv(find_dotenv(".env"))
 RAZER_KEY_ID = os.getenv("RAZER_KEY_ID")
 RAZER_KEY_SECRET = os.getenv("RAZER_KEY_SECRET")
 KAFKA_ORDER_TOPIC = os.getenv("KAFKA_ORDER_TOPIC")
+STAGE = str(os.getenv("STAGE"))
 
 
 def stripper(data):
@@ -51,7 +53,6 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
             if products_ordered_ref:
 
                 if encoded_data["payment_by"] == "razorpay":
-                    print("razorpay")
                     new_ord = Orders(
                         **{
                             "amount": encoded_data["amount"],
@@ -70,7 +71,6 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
                         }
                     )
                 else:
-                    print("COD")
                     new_ord = Orders(
                         **{
                             "amount": encoded_data["amount"],
@@ -90,16 +90,12 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
 
                 # Inset order
                 data = await new_ord.insert()
-                print("Order added to DB!")
                 return data.id
             else:
-                print("No products ordered!")
                 return ""
         else:
-            print(f"No such user found with id {encoded_data['userID']}")
             return ""
     except Exception as e:
-        print("Error adding order!", str(e))
         return ""
 
 
@@ -136,27 +132,26 @@ async def add_user_to_db(encoded_data, info):
                 user.phone_number = new_user["phone_number"]
 
             await user.save()
-            print("User added to DB!")
 
             # Publish message to apache kafka topic name order_details
             producer = info.context["kafka_producer"]
             await producer.send(KAFKA_ORDER_TOPIC, "Test!".encode("utf-8"))
         else:
-            print(f"No user found with id {encoded_data['userID']}!")
+            pass
     except Exception as e:
-        print("Error adding order!", str(e))
+        pass
 
 
 @strawberry.type
 class Mutation:
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def create_order(self, data: ipor, info: strawberry.Info) -> list[str]:
         try:
             # Clean data
             encoded_data = encode_input(data.__dict__)
-
-            print(encoded_data, "DATA")
             # Note : User will be authenticated anyway so no checks and no checks on product exists
 
             if encoded_data["payment_by"] == "razorpay":
@@ -178,7 +173,7 @@ class Mutation:
                         add_user_to_db, encoded_data, info
                     )
                 else:
-                    print("Not updating address")
+                    pass
                 return [razor_order_id, data]
             else:
                 data = await add_order_to_db(encoded_data, "")
@@ -189,13 +184,15 @@ class Mutation:
                         add_user_to_db, encoded_data, info
                     )
                 else:
-                    print("Not updating address")
+                    pass
                 return ["Order Placed! Cash on delivery mode"]
 
         except Exception as e:
             return [f"Error Occured {str(e)}"]
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def update_order(self, data: ipuor, info: strawberry.Info) -> ror:
         try:
             encoded_data = encode_input(data.__dict__)
@@ -203,7 +200,6 @@ class Mutation:
             del encoded_data["orderID"]
             if get_ord:
                 ord_updated = await get_ord.update({"$set": encoded_data})
-                print("Order Updated!")
 
                 # Background task data base insertion of user details
                 info.context["background_tasks"].add_task(
@@ -225,7 +221,9 @@ class Mutation:
         except Exception as e:
             return ror(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def delete_order(self, orderID: str) -> ror:
         try:
             get_ord = await Orders.get(orderID)
@@ -237,7 +235,9 @@ class Mutation:
         except Exception as e:
             return ror(data=None, err=str(e))
 
-    @strawberry.mutation
+    @strawberry.mutation(
+        permission_classes=[IsAuthenticated if STAGE == "production" else retval]
+    )
     async def get_order_by_id(self, orderID: str) -> ror:
         try:
             get_ord = await Orders.get(orderID)

@@ -30,12 +30,9 @@ class KafkaConnection:
         # Get cluster layout and initial topic/partition leadership information
         await self.producer.start()
 
-        print("Kafka Connected Connected!")
-
     async def disconnect(self):
         if self.producer:
             await self.producer.stop()
-        print("Kafka Disconnected!")
 
 
 kafka_connection = KafkaConnection()

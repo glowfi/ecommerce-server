@@ -12,6 +12,7 @@ from Graphql.schema.product import (
 from dotenv import load_dotenv, find_dotenv
 import os
 
+
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
 
