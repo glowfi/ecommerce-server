@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-WORKERS=8
-PORT=5000
+WORKERS=$(grep -c ^processor /proc/cpuinfo)
 
-echo "Production build!"
+echo "Production build started with ${WORKERS} workers!"
 
 # Clean pycache
 find . | grep *__pycache__/ | xargs -I "{}" rm -rf "{}"
