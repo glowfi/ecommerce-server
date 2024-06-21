@@ -30,10 +30,12 @@ httpx==0.27.0
 idna==3.7
 Jinja2==3.1.4
 lazy-model==0.2.0
+libcst==0.4.10
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 mdurl==0.1.2
 motor==3.4.0
+mypy-extensions==1.0.0
 orjson==3.10.3
 packaging==24.0
 pyasn1==0.6.0
@@ -51,6 +53,7 @@ python-multipart==0.0.9
 PyYAML==6.0.1
 razorpay==0.2.0
 redis==5.0.4
+remove-print-statements==0.5.2
 requests==2.32.2
 rich==13.7.1
 rsa==4.9
@@ -61,6 +64,7 @@ starlette==0.37.2
 strawberry-graphql==0.232.0
 toml==0.10.2
 typer==0.12.3
+typing-inspect==0.9.0
 typing_extensions==4.12.0
 ujson==5.10.0
 urllib3==2.2.1
