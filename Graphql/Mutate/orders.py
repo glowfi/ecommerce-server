@@ -16,8 +16,8 @@ from beanie.odm.operators.find.comparison import In
 
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
-RAZER_KEY_ID = os.getenv("RAZER_KEY_ID")
-RAZER_KEY_SECRET = os.getenv("RAZER_KEY_SECRET")
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 KAFKA_ORDER_TOPIC = os.getenv("KAFKA_ORDER_TOPIC")
 STAGE = str(os.getenv("STAGE"))
 
@@ -156,7 +156,7 @@ class Mutation:
 
             if encoded_data["payment_by"] == "razorpay":
                 # Just create a razorpay order and send it
-                client = razorpay.Client(auth=(RAZER_KEY_ID, RAZER_KEY_SECRET))
+                client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
                 razor_data = {
                     "amount": (round(encoded_data["amount"] * 0.08) * 100) + 300,
                     "currency": "INR",

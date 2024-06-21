@@ -11,6 +11,7 @@ if [[ "$STAGE" != "production" ]]; then
 	uvicorn main:app --host "localhost" --port "${PORT}" --log-level "info" --reload
 else
 	echo "Production build!"
+	source ./env/bin/activate
 	fd . | grep *__pycache__/ | xargs -I "{}" rm -rf "{}"
 	uvicorn main:app --host "localhost" --port "${PORT}" --log-level "info" --reload
 fi
