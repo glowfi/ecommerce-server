@@ -164,8 +164,8 @@ async def send_order_receipt(info, get_ord):
         "products_ordered": sanitize_products(get_ord.products_ordered),
         "tax": get_ord.tax,
         "shipping_fee": get_ord.shipping_fee,
-        "order_id": s,
-        "orderedAt": list(str(datetime.timestamp(datetime.now())).split("."))[0],
+        "order_id": get_ord.id,
+        "orderedAt": s,
         "email": get_ord.email,
         "name": get_ord.name,
     }
