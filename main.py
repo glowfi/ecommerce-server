@@ -12,6 +12,7 @@ from strawberry.fastapi import GraphQLRouter
 from fastapi.middleware.cors import CORSMiddleware
 from Middleware.modifyrequest import ModifyRequestBodyMiddleware
 from Middleware.modifyresponse import ModifyResponseBodyMiddleware
+import json
 
 # Read dotenv
 load_dotenv(find_dotenv(".env"))
@@ -80,7 +81,11 @@ app.add_middleware(
 
 # Default test router
 @app.get("/")
-def home():
+async def home():
+    producer = clients["kafka_producer"]
+    KAFKA_MAIL_TOPIC = os.getenv("KAFKA_MAIL_TOPIC")
+    data = {"operation": "keep-alive"}
+    await producer.send(KAFKA_MAIL_TOPIC, json.dumps(data).encode())
     return "welcome home!"
 
 

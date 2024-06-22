@@ -7,16 +7,16 @@ from Graphql.schema.forgotpassword import (
     InputForgotPassword,
 )
 from Middleware.jwtmanager import JWTManager
-from helper.sendmail import send_mail
-from helper.utils import checkUserExists, generate_random_number
+from helper.utils import checkUserExists
 from models.dbschema import OTP
-from helper.forget_password_html import html_content_forget_password
+import json
 
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
 OTP_TOKEN_EXPIRE_MINUTES = os.getenv("OTP_TOKEN_EXPIRE_MINUTES")
 STORE_NAME = " ".join(os.getenv("STORE_NAME").split("-"))
 FRONTEND_URL = os.getenv("FRONTEND_URL")
+KAFKA_MAIL_TOPIC = os.getenv("KAFKA_MAIL_TOPIC")
 
 
 @strawberry.type
@@ -39,28 +39,19 @@ class Mutation:
             new_otp = OTP(userID=userID, token=token)
             await new_otp.insert()
 
-            # Get email template
-            html_content = (
-                html_content_forget_password.replace("{{name}}", str(user[0].name))
-                .replace(
-                    "{{action_url_1}}", f"{FRONTEND_URL}/auth/resetpassword/{token}"
-                )
-                .replace("[Product Name]", str(STORE_NAME))
-                .replace("{{operating_system}}", data.os)
-                .replace("{{browser_name}}", data.browser)
-                .replace("{{support_url}}", "")
-                .replace("[Company Name, LLC]", f"{STORE_NAME} LLC")
-            )
-
-            # Send email
-            info.context["background_tasks"].add_task(
-                send_mail,
-                {
-                    "to": [data.email],
-                    "subject": "Forgot Password Link",
-                    "body": html_content,
-                },
-            )
+            # Publish message to apache kafka topic to send mail
+            producer = info.context["kafka_producer"]
+            produce_data = {
+                "FRONTEND_URL": FRONTEND_URL,
+                "STORE_NAME": STORE_NAME,
+                "os": data.os,
+                "browser": data.browser,
+                "name": str(user[0].name),
+                "token": token,
+                "email": data.email,
+            }
+            final_data = {"operation": "forgot_password", "data": produce_data}
+            await producer.send(KAFKA_MAIL_TOPIC, json.dumps(final_data).encode())
 
             return ForgotPasswordResponse(
                 data=ForgotPassword(

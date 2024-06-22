@@ -8,7 +8,7 @@ from aiokafka import AIOKafkaProducer
 load_dotenv(find_dotenv(".env"))
 
 
-# RedisConnection
+# KafkaConnection
 class KafkaConnection:
     def __init__(self):
         self.KAFKA_bootstrap_servers = os.getenv("KAFKA_bootstrap_servers")

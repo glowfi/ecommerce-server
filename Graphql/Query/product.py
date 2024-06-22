@@ -202,3 +202,17 @@ class Query:
                 )
         except Exception as e:
             return rpr(data=None, err=str(e))
+
+    @strawberry.field
+    async def check_stock_by_product_id(self, productID: str, quantity: int) -> bool:
+        try:
+            prod = await Product.get(productID, fetch_links=True)
+            if prod:
+                if prod.stock < quantity:
+                    return False
+                else:
+                    return True
+            else:
+                return False
+        except Exception as e:
+            return False

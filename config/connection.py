@@ -20,7 +20,7 @@ import httpx
 load_dotenv(find_dotenv(".env"))
 
 # Mongodb database and collection
-MONGODB_COLLECTION = "Product"
+MONGODB_INDEXED_COLLECTION = os.getenv("MONGODB_INDEXED_COLLECTION")
 MONGODB_DATABASE = os.getenv("MONGODB_DATABASE")
 
 # Atlas API related
@@ -62,10 +62,10 @@ class BeanieConnection:
                 OTP,
             ],
         )
-        print("Beanie Connected!", self.DB_URL)
+        print("Connected to mongodb instance!")
 
     async def findIndexByName(self, indexName: str):
-        URL = f"{ATLAS_SEARCH_INDEX_API_URL}/{MONGODB_DATABASE}/{MONGODB_COLLECTION}"
+        URL = f"{ATLAS_SEARCH_INDEX_API_URL}/{MONGODB_DATABASE}/{MONGODB_INDEXED_COLLECTION}"
 
         try:
             async with httpx.AsyncClient() as client:
@@ -97,7 +97,7 @@ class BeanieConnection:
                 r = await client.post(
                     f"https://cloud.mongodb.com/api/atlas/v2/groups/{ATLAS_PROJECT_ID}/clusters/{ATLAS_CLUSTER_NAME}/search/indexes?pretty=true",
                     json={
-                        "collectionName": MONGODB_COLLECTION,
+                        "collectionName": MONGODB_INDEXED_COLLECTION,
                         "database": MONGODB_DATABASE,
                         "definition": {
                             "mappings": {
@@ -141,7 +141,7 @@ class BeanieConnection:
             print("Not Creating indexes because index already exist!")
 
     async def disconnect(self):
-        print("Beanie Connected!", self.DB_URL)
+        print("Disconnected from mongodb instance!")
 
 
 beanie_connection = BeanieConnection()

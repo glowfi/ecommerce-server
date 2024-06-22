@@ -1,8 +1,8 @@
+import json
 import os
 import strawberry
 import razorpay
 from Middleware.jwtbearer import IsAuthenticated
-from helper.reciep_email_html import paste_table
 from models.dbschema import Orders, User, Product
 from Graphql.schema.orders import (
     ResponseOrders as ror,
@@ -11,15 +11,16 @@ from Graphql.schema.orders import (
 )
 from helper.utils import encode_input, generate_random_alphanumeric, retval
 from dotenv import load_dotenv, find_dotenv
-from beanie.odm.operators.find.comparison import In
+from datetime import datetime
 
 
 # Load dotenv
 load_dotenv(find_dotenv(".env"))
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
-KAFKA_ORDER_TOPIC = os.getenv("KAFKA_ORDER_TOPIC")
+KAFKA_MAIL_TOPIC = os.getenv("KAFKA_MAIL_TOPIC")
 STAGE = str(os.getenv("STAGE"))
+STORE_NAME = str(os.getenv("STORE_NAME"))
 
 
 def stripper(data):
@@ -133,13 +134,44 @@ async def add_user_to_db(encoded_data, info):
 
             await user.save()
 
-            # Publish message to apache kafka topic name order_details
-            producer = info.context["kafka_producer"]
-            await producer.send(KAFKA_ORDER_TOPIC, "Test!".encode("utf-8"))
         else:
-            pass
+            print(f"No user with id {encoded_data['userID']}")
     except Exception as e:
-        pass
+        print("Error", str(e))
+
+
+def sanitize_products(products):
+    ans = []
+    for product in products:
+        tmp = {}
+        tmp["quantity"] = product.quantity
+        tmp["price"] = product.price
+        tmp["title"] = product.title
+        ans.append(tmp)
+
+    return ans
+
+
+async def send_order_receipt(info, get_ord):
+
+    # Publish message to apache kafka topic to send mail
+    d = datetime.strptime(str(get_ord.orderedAt), "%Y-%m-%d %H:%M:%S.%f")
+    s = d.strftime("%m/%d/%Y %I:%M %p")
+
+    producer = info.context["kafka_producer"]
+    produce_data = {
+        "STORE_NAME": STORE_NAME,
+        "products_ordered": sanitize_products(get_ord.products_ordered),
+        "tax": get_ord.tax,
+        "shipping_fee": get_ord.shipping_fee,
+        "order_id": s,
+        "orderedAt": list(str(datetime.timestamp(datetime.now())).split("."))[0],
+        "email": get_ord.email,
+        "name": get_ord.name,
+    }
+    final_data = {"operation": "order_receipt", "data": produce_data}
+    print(final_data)
+    await producer.send(KAFKA_MAIL_TOPIC, json.dumps(final_data).encode())
 
 
 @strawberry.type
@@ -185,6 +217,12 @@ class Mutation:
                     )
                 else:
                     pass
+
+                if data:
+                    get_ord = await Orders.get(data)
+                    info.context["background_tasks"].add_task(
+                        send_order_receipt, info, get_ord
+                    )
                 return ["Order Placed! Cash on delivery mode"]
 
         except Exception as e:
@@ -201,18 +239,17 @@ class Mutation:
             if get_ord:
                 ord_updated = await get_ord.update({"$set": encoded_data})
 
-                # Background task data base insertion of user details
-                info.context["background_tasks"].add_task(
-                    paste_table,
-                    get_ord.products_ordered,
-                    get_ord.tax,
-                    get_ord.shipping_fee,
-                    get_ord.id,
-                    get_ord.orderedAt,
-                    get_ord.email,
-                    get_ord.name,
-                )
+                # Update inventory
+                for product in get_ord.products_ordered:
+                    get_quantity = product.quantity
+                    get_product = await Product.get(product.id)
+                    if get_product:
+                        get_product.stock -= get_quantity
+                        await get_product.save()
 
+                info.context["background_tasks"].add_task(
+                    send_order_receipt, info, get_ord
+                )
                 return ror(data=ord_updated, err=None)
             else:
                 return ror(
