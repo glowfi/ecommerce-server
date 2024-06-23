@@ -15,11 +15,13 @@ import typing
 
 def encode_input(data) -> dict:
     data = jsonable_encoder(data)
-    tmp = {}
+    new_data = {}
     for k, v in data.items():
-        if v not in ("", {}, []):
-            tmp[k] = v
-    return tmp
+        if isinstance(v, dict):
+            v = encode_input(v)
+        if v not in ("", None, {}, 0):
+            new_data[k] = v
+    return new_data
 
 
 def generate_random_number(length):

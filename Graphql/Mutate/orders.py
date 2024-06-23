@@ -23,16 +23,6 @@ STAGE = str(os.getenv("STAGE"))
 STORE_NAME = str(os.getenv("STORE_NAME"))
 
 
-def stripper(data):
-    new_data = {}
-    for k, v in data.items():
-        if isinstance(v, dict):
-            v = stripper(v)
-        if v not in ("", None, {}):
-            new_data[k] = v
-    return new_data
-
-
 async def add_order_to_db(encoded_data, razor_order_id=""):
     try:
         # Find User
@@ -107,7 +97,7 @@ async def add_user_to_db(encoded_data, info):
 
         if user:
             # Upadate User
-            new_user = stripper(encoded_data["userDetails"])
+            new_user = encoded_data(encoded_data["userDetails"])
 
             new_user_address = new_user["address"]
 
@@ -164,7 +154,7 @@ async def send_order_receipt(info, get_ord):
         "products_ordered": sanitize_products(get_ord.products_ordered),
         "tax": get_ord.tax,
         "shipping_fee": get_ord.shipping_fee,
-        "order_id": get_ord.id,
+        "order_id": str(get_ord.id),
         "orderedAt": list(str(datetime.timestamp(datetime.now())).split("."))[0],
         "email": get_ord.email,
         "name": get_ord.name,
