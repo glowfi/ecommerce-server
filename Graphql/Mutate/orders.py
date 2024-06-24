@@ -155,7 +155,7 @@ def sanitize_products(products):
     for product in products:
         tmp = {}
         tmp["quantity"] = product.quantity
-        tmp["price"] = product.price
+        tmp["price"] = ((100 - product.discount_percent) / 100) * (product.price)
         tmp["title"] = product.title
         ans.append(tmp)
 
