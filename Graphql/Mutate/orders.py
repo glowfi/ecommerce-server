@@ -39,49 +39,68 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
                         {**prod.__dict__, "quantity": int(pid[1])}
                     )
 
-            # print(products_ordered_ref)
-
             if products_ordered_ref:
 
                 if encoded_data["payment_by"] == "razorpay":
-                    new_ord = Orders(
-                        **{
-                            "amount": encoded_data["amount"],
-                            "user_ordered": user,
-                            "userid": str(user.id),
-                            "products_ordered": products_ordered_ref,
-                            "razorpay_details": {"razorpay_order_id": razor_order_id},
-                            "payment_by": encoded_data["payment_by"],
-                            "name": encoded_data["name"].title(),
-                            "email": encoded_data["email"],
-                            "phone_number": encoded_data["phone_number"],
-                            "address": encoded_data["address"],
-                            "update_address": encoded_data["update_address"],
-                            "shipping_fee": encoded_data["shipping_fee"],
-                            "tax": encoded_data["tax"],
-                        }
-                    )
-                else:
-                    new_ord = Orders(
-                        **{
-                            "amount": encoded_data["amount"],
-                            "user_ordered": user,
-                            "userid": str(user.id),
-                            "products_ordered": products_ordered_ref,
-                            "payment_by": encoded_data["payment_by"],
-                            "name": encoded_data["name"].title(),
-                            "email": encoded_data["email"],
-                            "phone_number": encoded_data["phone_number"],
-                            "address": encoded_data["address"],
-                            "update_address": encoded_data["update_address"],
-                            "shipping_fee": encoded_data["shipping_fee"],
-                            "tax": encoded_data["tax"],
-                        }
-                    )
+                    print("Entred Razor!")
 
-                # Inset order
-                data = await new_ord.insert()
-                return data.id
+                    try:
+                        new_ord = Orders(
+                            **{
+                                "amount": encoded_data["amount"],
+                                "user_ordered": user,
+                                "userid": str(user.id),
+                                "products_ordered": products_ordered_ref,
+                                "razorpay_details": {
+                                    "razorpay_order_id": razor_order_id
+                                },
+                                "payment_by": encoded_data["payment_by"],
+                                "name": encoded_data["name"].title(),
+                                "email": encoded_data["email"],
+                                "phone_number": encoded_data["phone_number"],
+                                "address": encoded_data["address"],
+                                "update_address": encoded_data.get(
+                                    "update_address", False
+                                ),
+                                "shipping_fee": encoded_data["shipping_fee"],
+                                "tax": encoded_data["tax"],
+                            }
+                        )
+                        # Inset order
+                        data = await new_ord.insert()
+                        return data.id
+                    except Exception as e:
+                        print(str(e))
+                        raise e
+
+                else:
+                    print("Entred COD!")
+                    try:
+                        new_ord = Orders(
+                            **{
+                                "amount": encoded_data["amount"],
+                                "user_ordered": user,
+                                "userid": str(user.id),
+                                "products_ordered": products_ordered_ref,
+                                "payment_by": encoded_data["payment_by"],
+                                "name": encoded_data["name"].title(),
+                                "email": encoded_data["email"],
+                                "phone_number": encoded_data["phone_number"],
+                                "address": encoded_data["address"],
+                                "update_address": encoded_data.get(
+                                    "update_address", False
+                                ),
+                                "shipping_fee": encoded_data["shipping_fee"],
+                                "tax": encoded_data["tax"],
+                            }
+                        )
+                        # Inset order
+                        data = await new_ord.insert()
+                        return data.id
+                    except Exception as e:
+                        print(str(e))
+                        raise e
+
             else:
                 return ""
         else:
@@ -131,6 +150,7 @@ async def add_user_to_db(encoded_data, info):
 
 
 def sanitize_products(products):
+    print(products)
     ans = []
     for product in products:
         tmp = {}
@@ -142,11 +162,20 @@ def sanitize_products(products):
     return ans
 
 
+async def update_inventory(get_ord):
+    for product in get_ord.products_ordered:
+        get_quantity = product.quantity
+        get_product = await Product.get(product.id)
+        if get_product:
+            get_product.stock -= get_quantity
+            await get_product.save()
+
+
 async def send_order_receipt(info, get_ord):
 
     # Publish message to apache kafka topic to send mail
     d = datetime.strptime(str(get_ord.orderedAt), "%Y-%m-%d %H:%M:%S.%f")
-    s = d.strftime("%m/%d/%Y %I:%M %p")
+    s = d.strftime("%d/%m/%Y %I:%M %p")
 
     producer = info.context["kafka_producer"]
     produce_data = {
@@ -155,7 +184,7 @@ async def send_order_receipt(info, get_ord):
         "tax": get_ord.tax,
         "shipping_fee": get_ord.shipping_fee,
         "order_id": str(get_ord.id),
-        "orderedAt": list(str(datetime.timestamp(datetime.now())).split("."))[0],
+        "orderedAt": s,
         "email": get_ord.email,
         "name": get_ord.name,
     }
@@ -173,7 +202,9 @@ class Mutation:
     async def create_order(self, data: ipor, info: strawberry.Info) -> list[str]:
         try:
             # Clean data
+            print(data.__dict__)
             encoded_data = encode_input(data.__dict__)
+            print(encoded_data)
             # Note : User will be authenticated anyway so no checks and no checks on product exists
 
             if encoded_data["payment_by"] == "razorpay":
@@ -188,8 +219,9 @@ class Mutation:
                 razor_order_id = create_order["id"]
 
                 data = await add_order_to_db(encoded_data, razor_order_id)
+                print(data, "ret_val")
 
-                if encoded_data["update_address"]:
+                if encoded_data.get("update_address", ""):
                     # Background task data base insertion of user details
                     info.context["background_tasks"].add_task(
                         add_user_to_db, encoded_data, info
@@ -200,7 +232,7 @@ class Mutation:
             else:
                 data = await add_order_to_db(encoded_data, "")
 
-                if encoded_data["update_address"]:
+                if encoded_data.get("update_address", ""):
                     # Background task data base insertion of user details
                     info.context["background_tasks"].add_task(
                         add_user_to_db, encoded_data, info
@@ -210,6 +242,8 @@ class Mutation:
 
                 if data:
                     get_ord = await Orders.get(data)
+                    await update_inventory(get_ord)
+                    # info.context["background_tasks"].add_task(update_inventory, get_ord)
                     info.context["background_tasks"].add_task(
                         send_order_receipt, info, get_ord
                     )
@@ -223,23 +257,28 @@ class Mutation:
     )
     async def update_order(self, data: ipuor, info: strawberry.Info) -> ror:
         try:
-            encoded_data = encode_input(data.__dict__)
+            print(data.__dict__)
+
+            original_data = data.__dict__
+            encoded_data = encode_input(original_data)
+
+            encoded_data["hasFailed"] = original_data["hasFailed"]
+            encoded_data["isPending"] = original_data["isPending"]
+
             get_ord = await Orders.get(encoded_data["orderID"])
+            print(encoded_data)
             del encoded_data["orderID"]
             if get_ord:
                 ord_updated = await get_ord.update({"$set": encoded_data})
 
-                # Update inventory
-                for product in get_ord.products_ordered:
-                    get_quantity = product.quantity
-                    get_product = await Product.get(product.id)
-                    if get_product:
-                        get_product.stock -= get_quantity
-                        await get_product.save()
+                if not encoded_data["hasFailed"]:
+                    # Update inventory
+                    await update_inventory(get_ord)
+                    # info.context["background_tasks"].add_task(update_inventory, get_ord)
 
-                info.context["background_tasks"].add_task(
-                    send_order_receipt, info, get_ord
-                )
+                    info.context["background_tasks"].add_task(
+                        send_order_receipt, info, get_ord
+                    )
                 return ror(data=ord_updated, err=None)
             else:
                 return ror(

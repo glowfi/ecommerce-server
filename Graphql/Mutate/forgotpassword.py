@@ -50,6 +50,7 @@ class Mutation:
                 "token": token,
                 "email": data.email,
             }
+            print(f"{FRONTEND_URL}/auth/resetpassword/{token}")
             final_data = {"operation": "forgot_password", "data": produce_data}
             await producer.send(KAFKA_MAIL_TOPIC, json.dumps(final_data).encode())
 
