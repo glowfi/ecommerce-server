@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-WORKERS=$(grep -c ^processor /proc/cpuinfo)
+# WORKERS=$(grep -c ^processor /proc/cpuinfo)
+WORKERS=3
 
 echo "Production build started with ${WORKERS} workers!"
 
