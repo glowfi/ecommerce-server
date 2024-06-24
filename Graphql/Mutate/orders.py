@@ -1,5 +1,6 @@
 import json
 import os
+from beanie import DeleteRules
 import strawberry
 import razorpay
 from Middleware.jwtbearer import IsAuthenticated
@@ -294,7 +295,7 @@ class Mutation:
         try:
             get_ord = await Orders.get(orderID)
             if get_ord:
-                ord_deleted = await get_ord.delete()
+                ord_deleted = await get_ord.delete(link_rule=DeleteRules.DELETE_LINKS)
                 return ror(data=ord_deleted, err=None)
             else:
                 return ror(data=None, err=f"No order with orderID {orderID}")

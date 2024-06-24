@@ -1,4 +1,5 @@
 import strawberry
+from beanie import DeleteRules
 import json
 from Middleware.jwtbearer import IsAuthenticated
 from models.dbschema import Category
@@ -79,7 +80,7 @@ class Mutation:
         try:
             get_cat = await Category.get(categoryID, fetch_links=True)
             if get_cat:
-                cat_delete = await get_cat.delete()
+                cat_delete = await get_cat.delete(link_rule=DeleteRules.DELETE_LINKS)
                 return rca(data=cat_delete, err=None)
             else:
                 return rca(

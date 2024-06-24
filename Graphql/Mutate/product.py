@@ -1,3 +1,4 @@
+from beanie import DeleteRules
 import strawberry
 import asyncio
 import json
@@ -122,7 +123,7 @@ class Mutation:
         try:
             prod = await Product.get(productID, fetch_links=True)
             if prod:
-                prod_delete = await prod.delete()
+                prod_delete = await prod.delete(link_rule=DeleteRules.DELETE_LINKS)
                 return rpr(data=prod_delete, err=None)
             else:
                 return rpr(

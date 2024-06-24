@@ -1,5 +1,6 @@
 import json
 import asyncio
+from beanie import DeleteRules
 import strawberry
 from Middleware.jwtbearer import IsAuthenticated
 from models.dbschema import Reviews, User, Product
@@ -166,7 +167,7 @@ class Mutation:
         try:
             get_rev = await Reviews.get(reviewID)
             if get_rev:
-                rev_deleted = await get_rev.delete()
+                rev_deleted = await get_rev.delete(link_rule=DeleteRules.DELETE_LINKS)
                 return rre(data=rev_deleted, err=None)
             else:
                 return rre(data=None, err=f"No review with reviewID {reviewID}")

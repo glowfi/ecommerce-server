@@ -1,3 +1,4 @@
+from beanie import DeleteRules
 import strawberry
 import json
 from helper.password import get_password_hash
@@ -72,7 +73,9 @@ class Mutation:
         try:
             get_seller = await Seller.get(sellerID)
             if get_seller:
-                seller_deleted = await get_seller.delete()
+                seller_deleted = await get_seller.delete(
+                    link_rule=DeleteRules.DELETE_LINKS
+                )
                 return rse(data=seller_deleted, err=None)
             else:
                 return rse(data=None, err=f"No seller with sellerID {sellerID}")

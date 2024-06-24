@@ -1,4 +1,5 @@
 import os
+from beanie import DeleteRules
 import strawberry
 from models.dbschema import Wishlist, User, Product
 from Graphql.schema.wishlist import (
@@ -72,7 +73,7 @@ class Mutation:
         try:
             get_wish = await Wishlist.get(wishID)
             if get_wish:
-                wish_deleted = await get_wish.delete()
+                wish_deleted = await get_wish.delete(link_rule=DeleteRules.DELETE_LINKS)
                 return rwi(data=wish_deleted, err=None)
             else:
                 return rwi(data=None, err=f"No wish with wishID {wishID}")
