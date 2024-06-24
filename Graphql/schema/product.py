@@ -102,6 +102,7 @@ class SearchResponse:
     title: str
     coverImage: list[str]
     discount_percent: float
+    stock: int
     rating: float
 
 

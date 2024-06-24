@@ -81,6 +81,7 @@ class Query:
                                 "price": 1,
                                 "rating": 1,
                                 "discount_percent": 1,
+                                "stock": 1,
                             },
                         },
                     ]
@@ -122,6 +123,7 @@ class Query:
                                 "price": 1,
                                 "rating": 1,
                                 "discount_percent": 1,
+                                "stock": 1,
                             },
                         },
                     ]
