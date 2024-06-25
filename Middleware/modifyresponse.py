@@ -10,7 +10,6 @@ from dotenv import find_dotenv, load_dotenv
 
 # Read dotenv
 load_dotenv(find_dotenv(".env"))
-secret = os.getenv("SECRET_REQ_RES")
 FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 
@@ -41,7 +40,7 @@ class ModifyResponseBodyMiddleware(BaseHTTPMiddleware):
                 data = json.loads(response_body.decode())
                 res = data.get("data", {}).get("__schema", {}).get("queryType")
                 if not res:
-                    modified_response = _encrypt(secret, json.dumps(data))
+                    modified_response = _encrypt(json.dumps(data))
                     currTask = data.get("data", {})
                     if "login" in currTask or "loginGoogle" in currTask:
                         getData = None

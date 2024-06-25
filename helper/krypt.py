@@ -1,8 +1,14 @@
+import os
 from Crypto.Cipher import AES
 from hashlib import md5
 import base64
+from dotenv import find_dotenv, load_dotenv
 
 BLOCK_SIZE = AES.block_size
+
+# Load dotenv
+load_dotenv(find_dotenv(".env"))
+SECRET_REQ_RES = str(os.getenv("SECRET_REQ_RES"))
 
 
 def get_aes(s):
@@ -27,14 +33,14 @@ def unpad(byte_array):
     return byte_array[: -ord(byte_array[-1:])]
 
 
-def _encrypt(s, data):
+def _encrypt(data):
     data = pad(data.encode("UTF-8"))
-    aes = get_aes(s)
+    aes = get_aes(SECRET_REQ_RES)
     encrypted = aes.encrypt(data)
     return base64.urlsafe_b64encode(encrypted).decode("utf-8")
 
 
-def _decrypt(s, edata):
+def _decrypt(edata):
     edata = base64.urlsafe_b64decode(edata)
-    aes = get_aes(s)
+    aes = get_aes(SECRET_REQ_RES)
     return unpad(aes.decrypt(edata)).decode("utf-8")

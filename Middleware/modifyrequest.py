@@ -1,10 +1,4 @@
-import os
 from helper.krypt import _decrypt
-from dotenv import find_dotenv, load_dotenv
-
-# Read dotenv
-load_dotenv(find_dotenv(".env"))
-secret = os.getenv("SECRET_REQ_RES")
 
 
 class ModifyRequestBodyMiddleware:
@@ -24,7 +18,7 @@ class ModifyRequestBodyMiddleware:
             body: str = body.decode()
 
             # print(body, "BODY")
-            decrypted = _decrypt(secret, body)
+            decrypted = _decrypt(body)
             message["body"] = decrypted.encode()
             return message
 
