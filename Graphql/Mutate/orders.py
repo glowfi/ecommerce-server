@@ -27,8 +27,11 @@ STORE_NAME = str(os.getenv("STORE_NAME"))
 async def add_order_to_db(encoded_data, razor_order_id=""):
     try:
         # Find User
-        user = await User.get(encoded_data["userID"], fetch_links=True)
-        # print(user)
+        user = None
+        try:
+            user = await User.get(encoded_data["userID"])
+        except Exception as e:
+            print(e)
 
         if user:
             # Find Product references
@@ -39,6 +42,8 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
                     products_ordered_ref.append(
                         {**prod.__dict__, "quantity": int(pid[1])}
                     )
+
+            print(products_ordered_ref)
 
             if products_ordered_ref:
 
@@ -203,9 +208,9 @@ class Mutation:
     async def create_order(self, data: ipor, info: strawberry.Info) -> list[str]:
         try:
             # Clean data
-            print(data.__dict__)
+            # print(data.__dict__)
             encoded_data = encode_input(data.__dict__)
-            print(encoded_data)
+            # print(encoded_data)
             # Note : User will be authenticated anyway so no checks and no checks on product exists
 
             if encoded_data["payment_by"] == "razorpay":
@@ -218,9 +223,10 @@ class Mutation:
                 }
                 create_order = client.order.create(data=razor_data)
                 razor_order_id = create_order["id"]
+                # print(create_order)
 
                 data = await add_order_to_db(encoded_data, razor_order_id)
-                print(data, "ret_val")
+                print(data, "GOT THIS BACK")
 
                 if encoded_data.get("update_address", ""):
                     # Background task data base insertion of user details
@@ -258,7 +264,7 @@ class Mutation:
     )
     async def update_order(self, data: ipuor, info: strawberry.Info) -> ror:
         try:
-            print(data.__dict__)
+            print(data.__dict__, "Revieved data")
 
             original_data = data.__dict__
             encoded_data = encode_input(original_data)
