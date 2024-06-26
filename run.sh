@@ -10,6 +10,9 @@ find . | grep *__pycache__/ | xargs -I "{}" rm -rf "{}"
 
 # Remove print statements
 remove-print-statements ./**/*.py
+cd ./Graphql/
+remove-print-statements ./**/*.py
+cd ..
 
 # Start Web app
 gunicorn main:app -w "${WORKERS}" -k uvicorn.workers.UvicornWorker
