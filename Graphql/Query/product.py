@@ -1,4 +1,5 @@
 from typing import Union
+from bson import ObjectId
 import strawberry
 from Graphql.schema.product import (
     ResponseGetallProduct as rgpr,
@@ -25,7 +26,9 @@ class Query:
     @strawberry.field
     async def get_all_products() -> rgpr:
         try:
-            allProducts = await Product.find_many(fetch_links=True).to_list()
+            allProducts = await Product.find_many(
+                fetch_links=True, nesting_depth=1
+            ).to_list()
             return rgpr(data=allProducts, err=None)
         except Exception as e:
             return rgpr(data=None, err=str(e))
@@ -195,7 +198,9 @@ class Query:
     @strawberry.field
     async def get_product_by_id(self, productID: str) -> rpr:
         try:
-            prod = await Product.get(productID, fetch_links=True)
+            prod = await Product.find_one(
+                Product.id == ObjectId(productID), fetch_links=True, nesting_depth=1
+            )
             if prod:
                 return rpr(data=prod, err=None)
             else:
@@ -208,7 +213,7 @@ class Query:
     @strawberry.field
     async def check_stock_by_product_id(self, productID: str, quantity: int) -> bool:
         try:
-            prod = await Product.get(productID, fetch_links=True)
+            prod = await Product.get(productID)
             if prod:
                 if prod.stock < quantity:
                     return False

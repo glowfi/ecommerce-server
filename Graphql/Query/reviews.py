@@ -204,6 +204,7 @@ class Query:
             getReviews = await Reviews.find_many(
                 Reviews.productId == prodID,
                 fetch_links=True,
+                nesting_depth=1,
                 skip=skipping,
                 limit=limit,
                 sort=-Reviews.id,

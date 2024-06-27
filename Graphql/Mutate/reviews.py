@@ -1,4 +1,3 @@
-import json
 import asyncio
 from beanie import DeleteRules
 import strawberry
@@ -38,7 +37,7 @@ async def update_product_rating(productID):
     getData = await Reviews.aggregate(aggregation_pipeline=pipeline).to_list()
 
     # Find Product
-    prod = await Product.get(productID, fetch_links=True)
+    prod = await Product.get(productID)
 
     if getData and getData[0].get("average_rating", ""):
         avgReviews = getData[0].get("average_rating")
@@ -52,7 +51,7 @@ async def update_product_rating(productID):
 async def insert_one_review(product, allUsers):
     productName = product.title
     productName = productName[: min(len(productName) - 1, 50)]
-    quantity = 30
+    quantity = 100
 
     params = {"quantity": quantity, "product": productName}
     query_string = urllib.parse.urlencode(params, doseq=True)
@@ -107,10 +106,14 @@ class Mutation:
         try:
             encoded_data = encode_input(data.__dict__)
             # Find User
-            user = await User.get(encoded_data["userID"], fetch_links=True)
+            user = await User.get(
+                encoded_data["userID"], fetch_links=True, nesting_depth=1
+            )
             if user:
                 # Find product
-                prod = await Product.get(encoded_data["productID"], fetch_links=True)
+                prod = await Product.get(
+                    encoded_data["productID"], fetch_links=True, nesting_depth=1
+                )
                 if prod:
                     profanity.load_censor_words()
                     encoded_data["comment"] = profanity.censor(encoded_data["comment"])
