@@ -1,6 +1,8 @@
 import json
 import os
 from beanie import DeleteRules
+from bson import ObjectId
+from pydantic import PydanticUserError
 import strawberry
 import razorpay
 from Middleware.jwtbearer import IsAuthenticated
@@ -13,6 +15,7 @@ from Graphql.schema.orders import (
 from helper.utils import encode_input, generate_random_alphanumeric, retval
 from dotenv import load_dotenv, find_dotenv
 from datetime import datetime
+from beanie import PydanticObjectId
 
 
 # Load dotenv
@@ -24,7 +27,11 @@ STAGE = str(os.getenv("STAGE"))
 STORE_NAME = str(os.getenv("STORE_NAME"))
 
 
-async def add_order_to_db(encoded_data, razor_order_id=""):
+async def add_order_to_db(
+    encoded_data,
+    info,
+    razor_order_id="",
+):
     try:
         # Find User
         user = None
@@ -43,7 +50,7 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
                         {**prod.__dict__, "quantity": int(pid[1])}
                     )
 
-            print(products_ordered_ref)
+            # print(products_ordered_ref)
 
             if products_ordered_ref:
 
@@ -53,6 +60,7 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
                     try:
                         new_ord = Orders(
                             **{
+                                "_id": encoded_data["_id"],
                                 "amount": encoded_data["amount"],
                                 "user_ordered": user,
                                 "userid": str(user.id),
@@ -84,6 +92,7 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
                     try:
                         new_ord = Orders(
                             **{
+                                "_id": encoded_data["_id"],
                                 "amount": encoded_data["amount"],
                                 "user_ordered": user,
                                 "userid": str(user.id),
@@ -100,12 +109,24 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
                                 "tax": encoded_data["tax"],
                             }
                         )
-                        # Inset order
+
+                        # Insert order
                         data = await new_ord.insert()
+
+                        # Update inventory
+                        get_ord = await Orders.get(data.id)
+                        # await update_inventory(get_ord)
+                        info.context["background_tasks"].add_task(
+                            update_inventory, get_ord
+                        )
+                        info.context["background_tasks"].add_task(
+                            send_order_receipt, info, get_ord
+                        )
+
                         return data.id
                     except Exception as e:
-                        print(str(e))
-                        raise e
+                        print(str(e), "Error Occcured!")
+                        # raise e
 
             else:
                 return ""
@@ -118,13 +139,11 @@ async def add_order_to_db(encoded_data, razor_order_id=""):
 async def add_user_to_db(encoded_data, info):
     try:
         # Find User
-        user = await User.get(encoded_data["userID"], fetch_links=True)
+        user = await User.get(encoded_data["userID"])
 
         if user:
             # Upadate User
-            new_user = encoded_data(encoded_data["userDetails"])
-
-            new_user_address = new_user["address"]
+            new_user = encode_input(encoded_data["userDetails"])
 
             if new_user["address"]["street_address"]:
                 user.address.street_address = new_user["address"]["street_address"]
@@ -148,6 +167,7 @@ async def add_user_to_db(encoded_data, info):
                 user.phone_number = new_user["phone_number"]
 
             await user.save()
+            print(new_user, "CURR USER")
 
         else:
             print(f"No user with id {encoded_data['userID']}")
@@ -156,7 +176,7 @@ async def add_user_to_db(encoded_data, info):
 
 
 def sanitize_products(products):
-    print(products)
+    # print(products)
     ans = []
     for product in products:
         tmp = {}
@@ -169,6 +189,7 @@ def sanitize_products(products):
 
 
 async def update_inventory(get_ord):
+    print("Update inventory")
     for product in get_ord.products_ordered:
         get_quantity = product.quantity
         get_product = await Product.get(product.id)
@@ -178,6 +199,7 @@ async def update_inventory(get_ord):
 
 
 async def send_order_receipt(info, get_ord):
+    print("Sending order receipt ...")
 
     # Publish message to apache kafka topic to send mail
     d = datetime.strptime(str(get_ord.orderedAt), "%Y-%m-%d %H:%M:%S.%f")
@@ -195,7 +217,7 @@ async def send_order_receipt(info, get_ord):
         "name": get_ord.name,
     }
     final_data = {"operation": "order_receipt", "data": produce_data}
-    print(final_data)
+    # print(final_data)
     await producer.send(KAFKA_MAIL_TOPIC, json.dumps(final_data).encode())
 
 
@@ -225,8 +247,16 @@ class Mutation:
                 razor_order_id = create_order["id"]
                 # print(create_order)
 
-                data = await add_order_to_db(encoded_data, razor_order_id)
-                print(data, "GOT THIS BACK")
+                # data = await add_order_to_db(encoded_data, razor_order_id)
+                # print(data, "GOT THIS BACK")
+
+                order_id = PydanticObjectId(oid=ObjectId())
+                print(order_id)
+                encoded_data["_id"] = order_id
+
+                info.context["background_tasks"].add_task(
+                    add_order_to_db, encoded_data, info, razor_order_id
+                )
 
                 if encoded_data.get("update_address", ""):
                     # Background task data base insertion of user details
@@ -235,9 +265,20 @@ class Mutation:
                     )
                 else:
                     pass
-                return [razor_order_id, data]
+                return [razor_order_id, str(order_id)]
             else:
-                data = await add_order_to_db(encoded_data, "")
+                # data = await add_order_to_db(encoded_data, "")
+
+                order_id = PydanticObjectId(oid=ObjectId())
+                print(order_id)
+                encoded_data["_id"] = order_id
+
+                info.context["background_tasks"].add_task(
+                    add_order_to_db,
+                    encoded_data,
+                    info,
+                    "",
+                )
 
                 if encoded_data.get("update_address", ""):
                     # Background task data base insertion of user details
@@ -247,14 +288,14 @@ class Mutation:
                 else:
                     pass
 
-                if data:
-                    get_ord = await Orders.get(data)
-                    await update_inventory(get_ord)
-                    # info.context["background_tasks"].add_task(update_inventory, get_ord)
-                    info.context["background_tasks"].add_task(
-                        send_order_receipt, info, get_ord
-                    )
-                return ["Order Placed! Cash on delivery mode"]
+                # if data:
+                #     get_ord = await Orders.get(data)
+                #     await update_inventory(get_ord)
+                #     # info.context["background_tasks"].add_task(update_inventory, get_ord)
+                #     info.context["background_tasks"].add_task(
+                #         send_order_receipt, info, get_ord
+                #     )
+                return ["Order Placed! Cash on delivery mode", str(order_id)]
 
         except Exception as e:
             return [f"Error Occured {str(e)}"]
@@ -271,17 +312,23 @@ class Mutation:
 
             encoded_data["hasFailed"] = original_data["hasFailed"]
             encoded_data["isPending"] = original_data["isPending"]
-
-            get_ord = await Orders.get(encoded_data["orderID"])
+            try:
+                get_ord = await Orders.find_one(
+                    Orders.id == ObjectId(encoded_data["orderID"])
+                )
+            except Exception as e:
+                print(str(e))
+                raise e
             print(encoded_data)
             del encoded_data["orderID"]
+            print(get_ord, "has order")
             if get_ord:
                 ord_updated = await get_ord.update({"$set": encoded_data})
 
                 if not encoded_data["hasFailed"]:
                     # Update inventory
-                    await update_inventory(get_ord)
-                    # info.context["background_tasks"].add_task(update_inventory, get_ord)
+                    # await update_inventory(get_ord)
+                    info.context["background_tasks"].add_task(update_inventory, get_ord)
 
                     info.context["background_tasks"].add_task(
                         send_order_receipt, info, get_ord
@@ -299,7 +346,7 @@ class Mutation:
     )
     async def delete_order(self, orderID: str) -> ror:
         try:
-            get_ord = await Orders.get(orderID)
+            get_ord = await Orders.find_one(Orders.id == ObjectId(orderID))
             if get_ord:
                 ord_deleted = await get_ord.delete(link_rule=DeleteRules.DELETE_LINKS)
                 return ror(data=ord_deleted, err=None)
@@ -313,7 +360,7 @@ class Mutation:
     )
     async def get_order_by_id(self, orderID: str) -> ror:
         try:
-            get_ord = await Orders.get(orderID)
+            get_ord = await Orders.find_one(Orders.id == ObjectId(orderID))
             if get_ord:
                 return ror(data=get_ord, err=None)
             else:

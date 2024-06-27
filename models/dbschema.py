@@ -1,7 +1,8 @@
-from typing import Optional
 from beanie import Document, Link, BackLink, Indexed
 from datetime import datetime
+from bson import ObjectId
 from pydantic import BaseModel, Field
+from typing import Optional, Union
 
 
 class Address(BaseModel):
@@ -125,6 +126,7 @@ class Product_Ordered(Product):
 
 
 class Orders(Document):
+    id: ObjectId = Field(default_factory=ObjectId)
     amount: float
     isPending: bool = Field(default=True)
     hasFailed: bool = Field(default=False)
@@ -143,6 +145,7 @@ class Orders(Document):
     tax: float
 
     class Config:
+        arbitrary_types_allowed = True
         from_attributes = True
 
 
