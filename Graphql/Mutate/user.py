@@ -85,6 +85,8 @@ class Mutation:
                 }
                 final_data = {"operation": "confirm_email", "data": produce_data}
 
+                print(f"{FRONTEND_URL}/auth/verifyaccount/{token}")
+
                 # Publish message to apache kafka topic to send mail
                 producer = info.context["kafka_producer"]
                 await producer.send(KAFKA_MAIL_TOPIC, json.dumps(final_data).encode())

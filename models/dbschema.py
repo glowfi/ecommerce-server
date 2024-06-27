@@ -6,12 +6,12 @@ from typing import Optional, Union
 
 
 class Address(BaseModel):
-    street_address: str
-    city: str
-    state: str
-    country: str
-    countryCode: str
-    zip_code: int
+    street_address: Optional[str] = Field(default_factory=str)
+    city: Optional[str] = Field(default_factory=str)
+    state: Optional[str] = Field(default_factory=str)
+    country: Optional[str] = Field(default_factory=str)
+    countryCode: Optional[str] = Field(default_factory=str)
+    zip_code: Optional[int] = Field(default_factory=int)
 
 
 class User(Document):
@@ -20,7 +20,7 @@ class User(Document):
     password: Optional[str] = Field(default_factory=str)
     dob: Optional[str] = Field(default_factory=str)
     phone_number: Optional[str] = Field(default_factory=str)
-    address: Optional[Address] = Field(default_factory=dict)
+    address: Optional[Address] = Field(default_factory=Address)
     profile_pic: Optional[str] = Field(default_factory=str)
     confirmed: Optional[bool] = Field(default=False)
     wishlist: list[BackLink["Wishlist"]] = Field(
@@ -53,7 +53,7 @@ class Seller(Document):
     password: str
     profile_pic: Optional[str] = Field(default_factory=str)
     company_name: str
-    company_address: Address
+    company_address: Optional[Address] = Field(default_factory=Address)
     seller_name: str
     products_selling: list[BackLink["Product"]] = Field(
         json_schema_extra={"original_field": "seller"}, default_factory=list
@@ -136,7 +136,7 @@ class Orders(Document):
     userid: str
     products_ordered: list[Product_Ordered]
     orderedAt: datetime = Field(default=datetime.now())
-    address: Address
+    address: Optional[Address] = Field(default_factory=Address)
     name: str
     email: str
     phone_number: str
