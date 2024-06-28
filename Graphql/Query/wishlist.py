@@ -19,7 +19,9 @@ class Query:
     )
     async def get_all_wishlis() -> rgwi:
         try:
-            allWishlist = await Wishlist.find_many(fetch_links=True).to_list()
+            allWishlist = await Wishlist.find_many(
+                fetch_links=True, nesting_depth=1
+            ).to_list()
             return rgwi(data=allWishlist, err=None)
         except Exception as e:
             return rgwi(data=None, err=str(e))

@@ -19,7 +19,9 @@ class Query:
     )
     async def get_all_orders() -> rgor:
         try:
-            allOrders = await Orders.find_many(fetch_links=True).to_list()
+            allOrders = await Orders.find_many(
+                fetch_links=True, nesting_depth=1
+            ).to_list()
             return rgor(data=allOrders, err=None)
         except Exception as e:
             return rgor(data=None, err=str(e))
@@ -68,7 +70,9 @@ class Query:
             # print(data[0].address.keys(), type(data[0].address))
 
             allOrders = (
-                await Orders.find(Orders.userid == userID, fetch_links=True)
+                await Orders.find(
+                    Orders.userid == userID, fetch_links=True, nesting_depth=1
+                )
                 .sort(-Orders.id)
                 .skip(skipping)
                 .limit(limit)

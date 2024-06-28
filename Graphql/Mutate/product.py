@@ -19,16 +19,21 @@ load_dotenv(find_dotenv(".env"))
 STAGE = str(os.getenv("STAGE"))
 
 
+async def delete_product(productID):
+    prod = await Product.get(productID, fetch_links=True)
+    await prod.delete(link_rule=DeleteRules.DELETE_LINKS)
+
+
 async def insert_one_product(prod):
     # Find Seller
     seller = await Seller.find(
-        Seller.email == prod["seller_info"]["email"], fetch_links=True
+        Seller.email == prod["seller_info"]["email"], fetch_links=True, nesting_depth=1
     ).first_or_none()
 
     # Find Category
     if seller:
         cat = await Category.find(
-            Category.name == prod["category"], fetch_links=True
+            Category.name == prod["category"], fetch_links=True, nesting_depth=1
         ).first_or_none()
         if cat:
             new_prod = Product(
@@ -70,10 +75,14 @@ class Mutation:
         try:
             encode_data = encode_input(data.__dict__)
             # Find Seller
-            seller = await Seller.get(encode_data["sellerID"], fetch_links=True)
+            seller = await Seller.get(
+                encode_data["sellerID"], fetch_links=True, nesting_depth=1
+            )
             # Find Category
             if seller:
-                cat = await Category.get(encode_data["categoryID"], fetch_links=True)
+                cat = await Category.get(
+                    encode_data["categoryID"], fetch_links=True, nesting_depth=1
+                )
                 if cat:
                     encode_data["category"] = cat
                     encode_data["seller"] = seller
@@ -104,7 +113,7 @@ class Mutation:
         try:
             encode_data = encode_input(data.__dict__)
             # Find Product
-            prod = await Product.get(productID, fetch_links=True)
+            prod = await Product.get(productID, fetch_links=True, nesting_depth=1)
             if prod:
                 prod_updated = await prod.update({"$set": encode_data})
                 return rpr(data=prod_updated, err=None)
@@ -119,12 +128,12 @@ class Mutation:
     @strawberry.mutation(
         permission_classes=[IsAuthenticated if STAGE == "production" else retval]
     )
-    async def delete_product(self, productID: str) -> rpr:
+    async def delete_product(self, productID: str, info: strawberry.Info) -> rpr:
         try:
-            prod = await Product.get(productID, fetch_links=True)
+            prod = await Product.get(productID, fetch_links=True, nesting_depth=1)
             if prod:
-                prod_delete = await prod.delete(link_rule=DeleteRules.DELETE_LINKS)
-                return rpr(data=prod_delete, err=None)
+                info.context["background_tasks"].add_task(delete_product, productID)
+                return rpr(data=prod, err=None)
             else:
                 return rpr(
                     data=None, err=f"No product found with productID {productID}"

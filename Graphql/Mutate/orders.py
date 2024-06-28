@@ -27,6 +27,14 @@ STAGE = str(os.getenv("STAGE"))
 STORE_NAME = str(os.getenv("STORE_NAME"))
 
 
+async def delete_order(orderID):
+    get_ord = await Orders.find_one(
+        Orders.id == ObjectId(orderID),
+        fetch_links=True,
+    )
+    await get_ord.delete(link_rule=DeleteRules.DELETE_LINKS)
+
+
 async def add_order_to_db(
     encoded_data,
     info,
@@ -344,12 +352,15 @@ class Mutation:
     @strawberry.mutation(
         permission_classes=[IsAuthenticated if STAGE == "production" else retval]
     )
-    async def delete_order(self, orderID: str) -> ror:
+    async def delete_order(self, orderID: str, info: strawberry.Info) -> ror:
         try:
-            get_ord = await Orders.find_one(Orders.id == ObjectId(orderID))
+            get_ord = await Orders.find_one(
+                Orders.id == ObjectId(orderID), fetch_links=True, nesting_depth=1
+            )
             if get_ord:
-                ord_deleted = await get_ord.delete(link_rule=DeleteRules.DELETE_LINKS)
-                return ror(data=ord_deleted, err=None)
+                info.context["background_tasks"].add_task(delete_order, orderID)
+
+                return ror(data=get_ord, err=None)
             else:
                 return ror(data=None, err=f"No order with orderID {orderID}")
         except Exception as e:

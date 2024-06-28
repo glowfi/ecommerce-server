@@ -21,7 +21,9 @@ class Query:
     @strawberry.field
     async def get_all_reviews() -> rgrev:
         try:
-            allReviews = await Reviews.find_many(fetch_links=True).to_list()
+            allReviews = await Reviews.find_many(
+                fetch_links=True, nesting_depth=1
+            ).to_list()
             return rgrev(data=allReviews, err=None)
         except Exception as e:
             return rgrev(data=None, err=str(e))
@@ -32,7 +34,7 @@ class Query:
             getProd = await Product.get(productID)
             if getProd:
                 getReviews = await Reviews.find_many(
-                    Reviews.productId == productID, fetch_links=True
+                    Reviews.productId == productID, fetch_links=True, nesting_depth=1
                 ).to_list()
                 return rgrev(data=getReviews, err=None)
             else:

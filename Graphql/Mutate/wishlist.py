@@ -17,6 +17,11 @@ load_dotenv(find_dotenv(".env"))
 STAGE = os.getenv("STAGE")
 
 
+async def delete_wishlist(wishID):
+    get_wish = await Wishlist.get(wishID, fetch_links=True)
+    await get_wish.delete(link_rule=DeleteRules.DELETE_LINKS)
+
+
 @strawberry.type
 class Mutation:
 
@@ -69,12 +74,12 @@ class Mutation:
     @strawberry.mutation(
         permission_classes=[IsAuthenticated if STAGE == "production" else retval]
     )
-    async def delete_wish(self, wishID: str) -> rwi:
+    async def delete_wish(self, wishID: str, info: strawberry.Info) -> rwi:
         try:
             get_wish = await Wishlist.get(wishID)
             if get_wish:
-                wish_deleted = await get_wish.delete(link_rule=DeleteRules.DELETE_LINKS)
-                return rwi(data=wish_deleted, err=None)
+                info.context["background_tasks"].add_task(delete_wishlist, wishID)
+                return rwi(data=get_wish, err=None)
             else:
                 return rwi(data=None, err=f"No wish with wishID {wishID}")
         except Exception as e:

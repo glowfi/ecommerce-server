@@ -32,12 +32,20 @@ async def insert_one_user(user):
     await new_user.insert()
 
 
-async def delete_user_account(user, producer):
-    await user.delete(link_rule=DeleteRules.DELETE_LINKS)
-    produce_data = {"STORE_NAME": STORE_NAME, "name": user.name, "email": user.email}
-    final_data = {"operation": "close_account", "data": produce_data}
+async def delete_user_account(userID, producer):
+    get_user = await User.find_one(
+        User.id == ObjectId(userID), fetch_links=True, nesting_depth=1
+    )
+    await get_user.delete(link_rule=DeleteRules.DELETE_LINKS)
+
+    produce_data = {
+        "STORE_NAME": STORE_NAME,
+        "name": get_user.name,
+        "email": get_user.email,
+    }
 
     # Publish message to apache kafka topic to send mail
+    final_data = {"operation": "close_account", "data": produce_data}
     await producer.send(KAFKA_MAIL_TOPIC, json.dumps(final_data).encode())
 
 
@@ -117,14 +125,14 @@ class Mutation:
     async def delete_user(self, userID: str, info: strawberry.Info) -> ru:
         try:
             get_user = await User.find_one(
-                User.id == ObjectId(userID), fetch_links=True
+                User.id == ObjectId(userID), fetch_links=True, nesting_depth=1
             )
             if get_user:
 
                 # Get producer
                 producer = info.context["kafka_producer"]
                 info.context["background_tasks"].add_task(
-                    delete_user_account, get_user, producer
+                    delete_user_account, userID, producer
                 )
                 return ru(data=get_user, err=None)
             else:

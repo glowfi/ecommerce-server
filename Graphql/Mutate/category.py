@@ -17,6 +17,11 @@ load_dotenv(find_dotenv(".env"))
 STAGE = str(os.getenv("STAGE"))
 
 
+async def delete_category(categoryID):
+    get_cat = await Category.get(categoryID, fetch_links=True)
+    await get_cat.delete(link_rule=DeleteRules.DELETE_LINKS)
+
+
 @strawberry.type
 class Mutation:
     @strawberry.mutation(
@@ -61,7 +66,7 @@ class Mutation:
     async def update_category(self, data: ipuca, categoryID: str) -> rca:
         try:
             encode_data = encode_input(data.__dict__)
-            get_cat = await Category.get(categoryID, fetch_links=True)
+            get_cat = await Category.get(categoryID, fetch_links=True, nesting_depth=1)
             if get_cat:
                 cat_updated = await get_cat.update({"$set": encode_data})
                 return rca(data=cat_updated, err=None)
@@ -76,12 +81,12 @@ class Mutation:
     @strawberry.mutation(
         permission_classes=[IsAuthenticated if STAGE == "production" else retval]
     )
-    async def delete_category(self, categoryID: str) -> rca:
+    async def delete_category(self, categoryID: str, info: strawberry.Info) -> rca:
         try:
-            get_cat = await Category.get(categoryID, fetch_links=True)
+            get_cat = await Category.get(categoryID, fetch_links=True, nesting_depth=1)
             if get_cat:
-                cat_delete = await get_cat.delete(link_rule=DeleteRules.DELETE_LINKS)
-                return rca(data=cat_delete, err=None)
+                info.context["background_tasks"].add_task(delete_category, categoryID)
+                return rca(data=get_cat, err=None)
             else:
                 return rca(
                     data=None,
@@ -93,7 +98,7 @@ class Mutation:
     @strawberry.mutation
     async def get_category_by_id(self, categoryID: str) -> rca:
         try:
-            get_cat = await Category.get(categoryID, fetch_links=True)
+            get_cat = await Category.get(categoryID, fetch_links=True, nesting_depth=1)
             if get_cat:
                 return rca(data=get_cat, err=None)
             else:

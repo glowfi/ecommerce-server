@@ -19,6 +19,11 @@ load_dotenv(find_dotenv(".env"))
 STAGE = os.getenv("STAGE")
 
 
+async def delete_seller(sellerID):
+    get_seller = await Seller.get(sellerID, fetch_links=True)
+    await get_seller.delete(link_rule=DeleteRules.DELETE_LINKS)
+
+
 @strawberry.type
 class Mutation:
     @strawberry.mutation(
@@ -69,14 +74,12 @@ class Mutation:
     @strawberry.mutation(
         permission_classes=[IsAuthenticated if STAGE == "production" else retval]
     )
-    async def delete_seller(self, sellerID: str) -> rse:
+    async def delete_seller(self, sellerID: str, info: strawberry.Info) -> rse:
         try:
             get_seller = await Seller.get(sellerID)
             if get_seller:
-                seller_deleted = await get_seller.delete(
-                    link_rule=DeleteRules.DELETE_LINKS
-                )
-                return rse(data=seller_deleted, err=None)
+                info.context["background_tasks"].add_task(delete_seller, sellerID)
+                return rse(data=get_seller, err=None)
             else:
                 return rse(data=None, err=f"No seller with sellerID {sellerID}")
         except Exception as e:

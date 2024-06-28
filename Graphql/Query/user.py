@@ -19,7 +19,7 @@ class Query:
     )
     async def get_all_users() -> rgu:
         try:
-            allUsers = await User.find_many(fetch_links=True).to_list()
+            allUsers = await User.find_many(fetch_links=True, nesting_depth=1).to_list()
             return rgu(data=allUsers, err=None)
         except Exception as e:
             return rgu(data=None, err=str(e))

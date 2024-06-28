@@ -8,7 +8,9 @@ class Query:
     @strawberry.field
     async def get_all_seller() -> rgse:
         try:
-            allSellers = await Seller.find_many(fetch_links=True).to_list()
+            allSellers = await Seller.find_many(
+                fetch_links=True, nesting_depth=1
+            ).to_list()
             return rgse(data=allSellers, err=None)
         except Exception as e:
             return rgse(data=None, err=str(e))

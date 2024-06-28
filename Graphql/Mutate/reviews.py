@@ -23,6 +23,11 @@ RANDOMMER_KEY = os.getenv("RANDOMMER_KEY")
 STAGE = os.getenv("STAGE")
 
 
+async def delete_review(reviewID):
+    get_rev = await Reviews.get(reviewID, fetch_links=True)
+    await get_rev.delete(link_rule=DeleteRules.DELETE_LINKS)
+
+
 async def update_product_rating(productID):
     pipeline = [
         {"$match": {"productId": productID}},
@@ -51,7 +56,7 @@ async def update_product_rating(productID):
 async def insert_one_review(product, allUsers):
     productName = product.title
     productName = productName[: min(len(productName) - 1, 50)]
-    quantity = 100
+    quantity = 500
 
     params = {"quantity": quantity, "product": productName}
     query_string = urllib.parse.urlencode(params, doseq=True)
@@ -166,12 +171,12 @@ class Mutation:
     @strawberry.mutation(
         permission_classes=[IsAuthenticated if STAGE == "production" else retval]
     )
-    async def delete_review(self, reviewID: str) -> rre:
+    async def delete_review(self, reviewID: str, info: strawberry.Info) -> rre:
         try:
             get_rev = await Reviews.get(reviewID)
             if get_rev:
-                rev_deleted = await get_rev.delete(link_rule=DeleteRules.DELETE_LINKS)
-                return rre(data=rev_deleted, err=None)
+                info.context["background_tasks"].add_task(delete_review, reviewID)
+                return rre(data=get_rev, err=None)
             else:
                 return rre(data=None, err=f"No review with reviewID {reviewID}")
         except Exception as e:
